@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        maven {
+            url = 'https://snapshots.elastic.co/maven/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath "org.elasticsearch.gradle:build-tools:7.10.2"
+    }
+}
+
+apply plugin: 'java'
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+apply plugin: 'elasticsearch.esplugin'
+
+licenseHeaders.enabled=false
+loggerUsageCheck.enabled=false
+test.enabled=false
+validateNebulaPom.enabled=false
+
+group="com.traveltime"
+version="0.2.0-SNAPSHOT"
+
+esplugin {
+    name 'traveltime'
+    description 'Traveltime plugin for Elasticsearch'
+    classname 'com.traveltime.plugin.elasticsearch.TraveltimePlugin'
+    licenseFile rootProject.file('LICENSE.txt')
+    noticeFile rootProject.file('NOTICE.txt')
+}
