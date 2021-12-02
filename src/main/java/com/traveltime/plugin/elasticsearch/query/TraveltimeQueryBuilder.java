@@ -1,0 +1,75 @@
+package com.traveltime.plugin.elasticsearch.query;
+
+import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
+import lombok.Setter;
+import org.apache.lucene.search.Query;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.io.stream.StreamInput;
+import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.QueryShardContext;
+
+import java.io.IOException;
+import java.util.Objects;
+
+@Setter
+public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQueryBuilder> {
+   String field = "";
+   GeoPoint origin = new GeoPoint();
+   int limit = -1;
+
+   public TraveltimeQueryBuilder() {
+   }
+
+   public TraveltimeQueryBuilder(StreamInput in) throws IOException {
+      super(in);
+      field = in.readString();
+      origin = in.readGeoPoint();
+      limit = in.readInt();
+   }
+
+   @Override
+   protected void doWriteTo(StreamOutput out) throws IOException {
+      out.writeString(field);
+      out.writeGeoPoint(origin);
+      out.writeInt(limit);
+   }
+
+   @Override
+   protected void doXContent(XContentBuilder builder, Params params) {
+
+   }
+
+   public TraveltimeQueryParameters params() {
+      return new TraveltimeQueryParameters(field, origin, limit);
+   }
+
+   @Override
+   protected Query doToQuery(QueryShardContext context) {
+      String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings());
+      return new TraveltimeSearchQuery(params(), apiKey);
+   }
+
+   @Override
+   protected boolean doEquals(TraveltimeQueryBuilder other) {
+      if (!Objects.equals(this.field, other.field)) return false;
+      if (!Objects.equals(this.origin, other.origin)) return false;
+      return this.limit == other.limit;
+   }
+
+   @Override
+   protected int doHashCode() {
+      final int PRIME = 59;
+      int result = 1;
+      result = result * PRIME + this.field.hashCode();
+      result = result * PRIME + this.origin.hashCode();
+      result = result * PRIME + this.limit;
+      return result;
+   }
+
+   @Override
+   public String getWriteableName() {
+      return TraveltimeQueryParser.NAME;
+   }
+}
