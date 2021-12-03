@@ -30,7 +30,7 @@ public class TraveltimeWeight extends Weight {
    public TraveltimeWeight(TraveltimeSearchQuery q) {
       super(q);
       ttQuery = q;
-      protoFetcher = new ProtoFetcher(q.apiKey);
+      protoFetcher = new ProtoFetcher(q.getAppId(), q.getApiKey());
    }
 
    @Override

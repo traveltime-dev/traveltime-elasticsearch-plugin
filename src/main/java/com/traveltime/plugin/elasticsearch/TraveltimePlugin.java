@@ -13,10 +13,11 @@ import org.elasticsearch.plugins.SearchPlugin;
 import java.util.List;
 
 public class TraveltimePlugin extends Plugin implements SearchPlugin {
-    public static Setting<String> API_KEY = Setting.simpleString("traveltime.api.key", Setting.Property.NodeScope);
+    public static Setting<String> APP_ID = Setting.simpleString("traveltime.app.id", Setting.Property.NodeScope);
+    public static Setting<String> API_KEY = Setting.simpleString("traveltime.api.key", Setting.Property.NodeScope, Setting.Property.Filtered);
 
     @Override
-    public List<Setting<?>> getSettings() { return List.of(API_KEY); }
+    public List<Setting<?>> getSettings() { return List.of(APP_ID, API_KEY); }
 
     @Override
     public List<QuerySpec<?>> getQueries() {

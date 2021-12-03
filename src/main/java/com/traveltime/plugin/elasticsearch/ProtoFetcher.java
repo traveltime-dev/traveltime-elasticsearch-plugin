@@ -41,8 +41,8 @@ public class ProtoFetcher {
       }
    }
 
-   public ProtoFetcher(String key) {
-      val builder = TravelTimeSDK.builder().appId("crude-curl").apiKey(key);
+   public ProtoFetcher(String id, String key) {
+      val builder = TravelTimeSDK.builder().appId(id).apiKey(key);
       api = Util.elevate(builder::build);
    }
 
