@@ -3,6 +3,7 @@ package com.traveltime.plugin.elasticsearch.aggregation;
 import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryParameters;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryParser;
+import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.val;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -39,8 +40,12 @@ public class TraveltimeAggregatorBuilder extends AbstractAggregationBuilder<Trav
    @Override
    protected AggregatorFactory doBuild(QueryShardContext queryShardContext, AggregatorFactory parent, AggregatorFactories.Builder subfactoriesBuilder) throws IOException {
       Transportation defaultMode = TraveltimePlugin.DEFAULT_MODE.get(queryShardContext.getIndexSettings().getSettings());
+      Country defaultCountry = TraveltimePlugin.DEFAULT_COUNTRY.get(queryShardContext.getIndexSettings().getSettings());
       if(filter.getMode() == null) {
          filter.setMode(defaultMode);
+      }
+      if(filter.getCountry() == null) {
+         filter.setCountry(defaultCountry);
       }
       return new TraveltimeAggregatorFactory(
          name,
