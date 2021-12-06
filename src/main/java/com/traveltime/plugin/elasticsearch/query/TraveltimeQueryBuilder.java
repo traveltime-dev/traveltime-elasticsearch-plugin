@@ -53,7 +53,12 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    protected Query doToQuery(QueryShardContext context) {
       String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings());
       String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings());
-      return new TraveltimeSearchQuery(params(), appId, apiKey);
+      Transportation defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
+      TraveltimeQueryParameters params = params();
+      if(params.getMode() == null) {
+         params.setMode(defaultMode);
+      }
+      return new TraveltimeSearchQuery(params, appId, apiKey);
    }
 
    @Override

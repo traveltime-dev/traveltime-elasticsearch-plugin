@@ -1,10 +1,7 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.sdk.dto.requests.proto.Transportation;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -14,9 +11,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import java.io.IOException;
 
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-@Getter
+@Data
 public class TraveltimeQueryParameters implements ToXContent {
    String field;
    GeoPoint origin;
@@ -41,7 +36,7 @@ public class TraveltimeQueryParameters implements ToXContent {
       builder.field("field", field);
       builder.field("origin", origin);
       builder.field("limit", limit);
-      builder.field("mode", mode);
+      builder.field("transportationMode", mode);
    }
 
    @Override
