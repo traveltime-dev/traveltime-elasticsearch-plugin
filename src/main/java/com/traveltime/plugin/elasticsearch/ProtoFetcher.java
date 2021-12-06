@@ -46,13 +46,13 @@ public class ProtoFetcher {
       api = Util.elevate(builder::build);
    }
 
-   public Iterable<Tuple2<GeoPoint, Integer>> getTimes(GeoPoint origin, List<GeoPoint> destinations, int limit, Transportation mode) {
+   public Iterable<Tuple2<GeoPoint, Integer>> getTimes(GeoPoint origin, List<GeoPoint> destinations, int limit, Transportation mode, Country country) {
       val fastProto = TimeFilterFastProtoRequest
          .builder()
          .oneToMany(
             OneToMany
                .builder()
-               .country(Country.UNITED_KINGDOM)
+               .country(country)
                .transportation(mode)
                .originCoordinate(Util.toCoord(origin))
                .destinationCoordinates(destinations.stream().map(Util::toCoord).collect(Collectors.toList()))

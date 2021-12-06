@@ -1,5 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
+import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.ParsingException;
@@ -15,7 +16,8 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
    ParseField field = new ParseField("field");
    ParseField origin = new ParseField("origin");
    ParseField limit = new ParseField("limit");
-   ParseField mode = new ParseField("transportationMode");
+   ParseField mode = new ParseField("mode");
+   ParseField country = new ParseField("country");
 
    ObjectParser<GeoPoint, Void> pointParser = new ObjectParser<>("origin", () -> new GeoPoint(Double.NaN, Double.NaN));
 
@@ -31,6 +33,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
       queryParser.declareObject(TraveltimeQueryBuilder::setOrigin, pointParser, origin);
       queryParser.declareInt(TraveltimeQueryBuilder::setLimit, limit);
       queryParser.declareString((qb, s) -> qb.setMode(Transportation.valueOf(s)), mode);
+      queryParser.declareString((qb, s) -> qb.setCountry(Country.valueOf(s)), country);
    }
 
 

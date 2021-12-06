@@ -1,5 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
+import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.*;
 import org.elasticsearch.common.geo.GeoPoint;
@@ -17,12 +18,14 @@ public class TraveltimeQueryParameters implements ToXContent {
    GeoPoint origin;
    int limit;
    Transportation mode;
+   Country country;
 
    public TraveltimeQueryParameters(StreamInput in) throws IOException {
       field = in.readString();
       origin = in.readGeoPoint();
       limit = in.readInt();
       mode = in.readEnum(Transportation.class);
+      country = in.readEnum(Country.class);
    }
 
    public void writeTo(StreamOutput out) throws IOException {
@@ -30,6 +33,7 @@ public class TraveltimeQueryParameters implements ToXContent {
       out.writeGeoPoint(origin);
       out.writeInt(limit);
       out.writeEnum(mode);
+      out.writeEnum(country);
    }
 
    public void doWriteXContent(XContentBuilder builder) throws IOException {
@@ -37,6 +41,7 @@ public class TraveltimeQueryParameters implements ToXContent {
       builder.field("origin", origin);
       builder.field("limit", limit);
       builder.field("transportationMode", mode);
+      builder.field("country", country);
    }
 
    @Override
