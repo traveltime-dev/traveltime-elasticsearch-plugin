@@ -36,7 +36,7 @@ public final class Util {
    }
 
    public static <K, V> Collector<Tuple2<K, V>, ?, Map<K, V>> toMap() {
-      return Collectors.toMap(kvTuple2 -> kvTuple2._1, kvTuple21 -> kvTuple21._2);
+      return Collectors.toMap(Tuple2::_1, Tuple2::_2);
    }
 
    public static <K, V> Map<K, V> toMap(Stream<Tuple2<K, V>> stream) {

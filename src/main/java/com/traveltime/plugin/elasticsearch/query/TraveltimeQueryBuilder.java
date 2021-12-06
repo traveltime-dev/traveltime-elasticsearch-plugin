@@ -1,6 +1,7 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
+import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.Setter;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.geo.GeoPoint;
@@ -15,9 +16,10 @@ import java.util.Objects;
 
 @Setter
 public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQueryBuilder> {
-   String field = "";
-   GeoPoint origin = new GeoPoint();
-   int limit = -1;
+   String field;
+   GeoPoint origin;
+   int limit;
+   Transportation mode;
 
    public TraveltimeQueryBuilder() {
    }
@@ -27,6 +29,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       field = in.readString();
       origin = in.readGeoPoint();
       limit = in.readInt();
+      mode = in.readEnum(Transportation.class);
    }
 
    @Override
@@ -34,6 +37,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeString(field);
       out.writeGeoPoint(origin);
       out.writeInt(limit);
+      out.writeEnum(mode);
    }
 
    @Override
@@ -42,7 +46,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    }
 
    public TraveltimeQueryParameters params() {
-      return new TraveltimeQueryParameters(field, origin, limit);
+      return new TraveltimeQueryParameters(field, origin, limit, mode);
    }
 
    @Override
@@ -56,6 +60,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    protected boolean doEquals(TraveltimeQueryBuilder other) {
       if (!Objects.equals(this.field, other.field)) return false;
       if (!Objects.equals(this.origin, other.origin)) return false;
+      if (!Objects.equals(this.mode, other.mode)) return false;
       return this.limit == other.limit;
    }
 
@@ -65,6 +70,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       int result = 1;
       result = result * PRIME + this.field.hashCode();
       result = result * PRIME + this.origin.hashCode();
+      result = result * PRIME + this.mode.hashCode();
       result = result * PRIME + this.limit;
       return result;
    }

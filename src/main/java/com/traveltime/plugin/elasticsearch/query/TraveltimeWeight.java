@@ -60,7 +60,7 @@ public class TraveltimeWeight extends Weight {
          .collect(Collectors.toList())
          .grouped(100_000)
          .stream()
-         .flatMap(locs -> protoFetcher.getTimes(ttQuery.getParams().origin, locs, ttQuery.getParams().limit).toStream())
+         .flatMap(locs -> protoFetcher.getTimes(ttQuery.getParams().getOrigin(), locs, ttQuery.getParams().getLimit(), ttQuery.getParams().getMode()).toStream())
          .filter(kv -> kv._2 > 0)
          .toMap();
 

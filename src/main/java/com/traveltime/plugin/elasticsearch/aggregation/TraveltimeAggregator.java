@@ -136,7 +136,7 @@ public class TraveltimeAggregator extends BucketsAggregator {
          final InternalAggregations aggs = InternalAggregations.reduce(subAggregationsList, reduceContext);
 
          val points = newDocs.stream().map(DocData::getCoords).collect(Collectors.toList());
-         val times = fetcher.getTimes(params.getOrigin(), points, params.getLimit());
+         val times = fetcher.getTimes(params.getOrigin(), points, params.getLimit(), params.getMode());
          final List<DocData> filteredDocs =
             new ZipIterable<>(newDocs, times)
                .toStream()

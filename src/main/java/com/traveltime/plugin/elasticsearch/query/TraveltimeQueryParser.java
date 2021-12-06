@@ -1,5 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
+import com.traveltime.sdk.dto.requests.proto.Transportation;
 import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.geo.GeoPoint;
@@ -14,6 +15,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
    ParseField field = new ParseField("field");
    ParseField origin = new ParseField("origin");
    ParseField limit = new ParseField("limit");
+   ParseField mode = new ParseField("transportationMode");
 
    ObjectParser<GeoPoint, Void> pointParser = new ObjectParser<>("origin", () -> new GeoPoint(Double.NaN, Double.NaN));
 
@@ -28,6 +30,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
       queryParser.declareString(TraveltimeQueryBuilder::setField, field);
       queryParser.declareObject(TraveltimeQueryBuilder::setOrigin, pointParser, origin);
       queryParser.declareInt(TraveltimeQueryBuilder::setLimit, limit);
+      queryParser.declareString((qb, s) -> qb.setMode(Transportation.valueOf(s)), mode);
    }
 
 
