@@ -140,7 +140,7 @@ public class TraveltimeAggregator extends BucketsAggregator {
          final List<DocData> filteredDocs =
             new ZipIterable<>(newDocs, times)
                .toStream()
-               .filter(dt -> dt._2._2 > 0)
+               .filter(dt -> dt._2 > 0)
                .map(Tuple2::_1)
                .collect(Collectors.toList());
 

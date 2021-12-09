@@ -40,7 +40,7 @@ public class TraveltimeQueryParameters implements ToXContent {
       builder.field("field", field);
       builder.field("origin", origin);
       builder.field("limit", limit);
-      builder.field("transportationMode", mode);
+      builder.field("mode", mode);
       builder.field("country", country);
    }
 

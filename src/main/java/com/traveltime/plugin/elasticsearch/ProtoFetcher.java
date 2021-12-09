@@ -1,16 +1,15 @@
 package com.traveltime.plugin.elasticsearch;
 
 import com.traveltime.plugin.elasticsearch.util.Util;
-import com.traveltime.plugin.elasticsearch.util.ZipIterable;
 import com.traveltime.sdk.TravelTimeSDK;
 import com.traveltime.sdk.dto.requests.TimeFilterFastProtoRequest;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.OneToMany;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
+import com.traveltime.sdk.dto.responses.TimeFilterFastProtoResponse;
 import com.traveltime.sdk.dto.responses.errors.IOError;
 import com.traveltime.sdk.dto.responses.errors.ResponseError;
 import com.traveltime.sdk.dto.responses.errors.TravelTimeError;
-import io.vavr.Tuple2;
 import lombok.val;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,30 +45,32 @@ public class ProtoFetcher {
       api = Util.elevate(builder::build);
    }
 
-   public Iterable<Tuple2<GeoPoint, Integer>> getTimes(GeoPoint origin, List<GeoPoint> destinations, int limit, Transportation mode, Country country) {
-      val fastProto = TimeFilterFastProtoRequest
-         .builder()
-         .oneToMany(
-            OneToMany
-               .builder()
-               .country(country)
-               .transportation(mode)
-               .originCoordinate(Util.toCoord(origin))
-               .destinationCoordinates(destinations.stream().map(Util::toCoord).collect(Collectors.toList()))
-               .travelTime(limit)
-               .build()
-         )
-         .build();
+   public List<Integer> getTimes(GeoPoint origin, List<GeoPoint> destinations, int limit, Transportation mode, Country country) {
+      val fastProto =
+         TimeFilterFastProtoRequest
+            .builder()
+            .oneToMany(
+               OneToMany
+                  .builder()
+                  .country(country)
+                  .transportation(mode)
+                  .originCoordinate(Util.toCoord(origin))
+                  .destinationCoordinates(destinations.stream().map(Util::toCoord).collect(Collectors.toList()))
+                  .travelTime(limit)
+                  .build()
+            )
+            .build();
 
 
-      val result = Util.elevate(() -> api.sendProto(fastProto));
+      log.info(String.format("Fetching %d destinations", destinations.size()));
+      val result = Util.time(log, () -> Util.elevate(() -> api.sendProto(fastProto)));
 
       return result.fold(
          err -> {
             logError(err);
-            return new ZipIterable<>(destinations, Collections.nCopies(destinations.size(), -1));
+            return Collections.nCopies(destinations.size(), -1);
          },
-         response -> new ZipIterable<>(destinations, response.getTravelTimes())
+         TimeFilterFastProtoResponse::getTravelTimes
       );
    }
 

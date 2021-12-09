@@ -1,17 +1,20 @@
 package com.traveltime.plugin.elasticsearch.util;
 
 import com.traveltime.sdk.dto.common.Coordinates;
-import io.vavr.Tuple2;
+import com.traveltime.sdk.dto.requests.proto.Country;
+import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.val;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.geo.GeoEncodingUtils;
 import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.geo.GeoPoint;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.*;
+import java.util.Arrays;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class Util {
    private Util() {
@@ -28,23 +31,16 @@ public final class Util {
       return new GeoPoint().resetLat(lat).resetLon(lon);
    }
 
-
-   public static <A> List<List<A>> grouped(List<A> collection, int groupSize) {
-      return IntStream.iterate(0, i -> i < collection.size(), i -> i + groupSize)
-         .mapToObj(i -> collection.subList(i, Math.min(i + groupSize, collection.size())))
-         .collect(Collectors.toList());
-   }
-
-   public static <K, V> Collector<Tuple2<K, V>, ?, Map<K, V>> toMap() {
-      return Collectors.toMap(Tuple2::_1, Tuple2::_2);
-   }
-
-   public static <K, V> Map<K, V> toMap(Stream<Tuple2<K, V>> stream) {
-      return stream.collect(Util.toMap());
-   }
-
    public static <A> Stream<A> toStream(Iterable<A> iterable) {
       return StreamSupport.stream(iterable.spliterator(), false);
+   }
+
+   public static Transportation findModeByName(String name) {
+      return Arrays.stream(Transportation.values()).filter(it -> it.getValue().equals(name)).findFirst().get();
+   }
+
+   public static Country findCountryByName(String name) {
+      return Arrays.stream(Country.values()).filter(it -> it.getValue().equals(name)).findFirst().get();
    }
 
    public static <A> A elevate(PrivilegedAction<A> expr) {
@@ -53,5 +49,15 @@ public final class Util {
          sm.checkPermission(new SpecialPermission());
       }
       return AccessController.doPrivileged(expr);
+   }
+
+   public static <A> A time(Logger logger, Supplier<A> expr) {
+      val startTime = System.currentTimeMillis();
+      val res = expr.get();
+      val endTime = System.currentTimeMillis();
+      val lastStack = Thread.currentThread().getStackTrace()[2].toString();
+      val message = String.format("In %s took %d ms", lastStack, endTime - startTime);
+      logger.info(message);
+      return res;
    }
 }

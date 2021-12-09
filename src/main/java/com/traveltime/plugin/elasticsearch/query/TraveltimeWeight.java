@@ -1,10 +1,13 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
+import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
 import com.traveltime.plugin.elasticsearch.util.Util;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.ExtensionMethod;
 import lombok.val;
+import org.apache.logging.log4j.LogManager;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.DocIdSetIterator;
@@ -15,9 +18,7 @@ import org.elasticsearch.common.geo.GeoPoint;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @ExtensionMethod(Util.class)
 @EqualsAndHashCode(callSuper = false)
@@ -54,21 +55,37 @@ public class TraveltimeWeight extends Weight {
          valueArray.add(Util.decode(backing.nextValue()));
       }
 
-      final Map<GeoPoint, Integer> pointToTime = valueArray
-         .stream()
-         .distinct()
-         .collect(Collectors.toList())
-         .grouped(100_000)
-         .stream()
-         .flatMap(locs -> protoFetcher.getTimes(
-            ttQuery.getParams().getOrigin(),
-            locs,
-            ttQuery.getParams().getLimit(),
-            ttQuery.getParams().getMode(),
-            ttQuery.getParams().getCountry()
-         ).toStream())
-         .filter(kv -> kv._2 > 0)
-         .toMap();
+      val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
+
+      val log = LogManager.getLogger();
+      int batchSize = TraveltimePlugin.BATCH_SIZE;
+      if(valueArray.size() % batchSize < batchSize * 0.5) {
+         val batchCount = Math.floor(((float) valueArray.size())/ batchSize);
+         batchSize = (int) Math.ceil(valueArray.size() / batchCount);
+      }
+
+      final int effectiveBatchSize = batchSize;
+
+      Util.time(log, () -> {
+            for (int offset = 0; offset < valueArray.size(); offset += effectiveBatchSize) {
+               val batch = valueArray.subList(offset, Math.min(offset + effectiveBatchSize, valueArray.size()));
+               val batchResult = protoFetcher.getTimes(
+                  ttQuery.getParams().getOrigin(),
+                  batch,
+                  ttQuery.getParams().getLimit(),
+                  ttQuery.getParams().getMode(),
+                  ttQuery.getParams().getCountry()
+               );
+               for (int ix = 0; ix < batchResult.size(); ix++) {
+                  if (batchResult.get(ix) >= 0) {
+                     pointToTime.put(valueArray.get(offset + ix), batchResult.get(ix).intValue());
+                  }
+               }
+            }
+            return 0;
+         }
+      );
+
 
       return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().field));
    }

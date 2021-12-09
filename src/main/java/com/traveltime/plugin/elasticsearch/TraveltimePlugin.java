@@ -4,6 +4,7 @@ import com.traveltime.plugin.elasticsearch.aggregation.TraveltimeAggregator;
 import com.traveltime.plugin.elasticsearch.aggregation.TraveltimeAggregatorBuilder;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryBuilder;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryParser;
+import com.traveltime.plugin.elasticsearch.util.Util;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.val;
@@ -17,8 +18,10 @@ import java.util.List;
 public class TraveltimePlugin extends Plugin implements SearchPlugin {
    public static Setting<String> APP_ID = Setting.simpleString("traveltime.app.id", Setting.Property.NodeScope);
    public static Setting<String> API_KEY = Setting.simpleString("traveltime.api.key", Setting.Property.NodeScope, Setting.Property.Filtered);
-   public static Setting<Transportation> DEFAULT_MODE = new Setting<>("traveltime.default.mode", s -> "DRIVING_FERRY", Transportation::valueOf, Setting.Property.NodeScope);
-   public static Setting<Country> DEFAULT_COUNTRY = new Setting<>("traveltime.default.country", s -> "UNITED_KINGDOM", Country::valueOf, Setting.Property.NodeScope);
+   public static Setting<Transportation> DEFAULT_MODE = new Setting<>("traveltime.default.mode", s -> "driving+ferry", Util::findModeByName, Setting.Property.NodeScope);
+   public static Setting<Country> DEFAULT_COUNTRY = new Setting<>("traveltime.default.country", s -> "uk", Util::findCountryByName, Setting.Property.NodeScope);
+
+   public static int BATCH_SIZE = 550_000;
 
    @Override
    public List<Setting<?>> getSettings() {
