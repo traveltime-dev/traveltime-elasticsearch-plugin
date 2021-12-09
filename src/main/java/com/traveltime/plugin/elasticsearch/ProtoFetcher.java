@@ -2,6 +2,7 @@ package com.traveltime.plugin.elasticsearch;
 
 import com.traveltime.plugin.elasticsearch.util.Util;
 import com.traveltime.sdk.TravelTimeSDK;
+import com.traveltime.sdk.auth.BaseAuth;
 import com.traveltime.sdk.dto.requests.TimeFilterFastProtoRequest;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.OneToMany;
@@ -41,7 +42,8 @@ public class ProtoFetcher {
    }
 
    public ProtoFetcher(String id, String key) {
-      val builder = TravelTimeSDK.builder().appId(id).apiKey(key);
+      val auth = new BaseAuth(id, key);
+      val builder = TravelTimeSDK.builder().credentials(auth);
       api = Util.elevate(builder::build);
    }
 

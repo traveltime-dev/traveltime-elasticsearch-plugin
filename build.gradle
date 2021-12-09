@@ -29,11 +29,11 @@ compileJava {
 
 dependencies {
     compileOnly 'org.elasticsearch:elasticsearch:7.10.2'
-    implementation('com.traveltime:traveltime-sdk-java:1.0.5') {
+    implementation('com.traveltime:traveltime-sdk-java:1.1.0') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.locationtech.jts'
     }
-    implementation 'io.vavr:vavr:0.9.0'
+    implementation 'io.vavr:vavr:0.10.4'
     implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.6'
 }
 

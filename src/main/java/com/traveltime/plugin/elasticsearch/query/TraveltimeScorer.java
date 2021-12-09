@@ -5,13 +5,13 @@ import lombok.AllArgsConstructor;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
-import org.apache.lucene.search.Weight;
 import org.elasticsearch.common.geo.GeoPoint;
 
 import java.io.IOException;
 import java.util.Map;
 
 public class TraveltimeScorer extends Scorer {
+   protected final TraveltimeWeight weight;
    Map<GeoPoint, Integer> pointToTime;
    SortedNumericDocValues docs;
 
@@ -63,8 +63,9 @@ public class TraveltimeScorer extends Scorer {
       }
    }
 
-   public TraveltimeScorer(Weight w, Map<GeoPoint, Integer> coordToTime, SortedNumericDocValues docs) {
+   public TraveltimeScorer(TraveltimeWeight w, Map<GeoPoint, Integer> coordToTime, SortedNumericDocValues docs) {
       super(w);
+      this.weight = w;
       this.pointToTime = coordToTime;
       this.docs = new TraveltimeFilteredDocs(docs);
    }
@@ -81,7 +82,10 @@ public class TraveltimeScorer extends Scorer {
 
    @Override
    public float score() throws IOException {
-      return pointToTime.getOrDefault(Util.decode(docs.nextValue()), 0);
+      int limit = weight.getTtQuery().getParams().getLimit();
+      int tt = pointToTime.getOrDefault(Util.decode(docs.nextValue()), limit + 1);
+      return ((float)(limit - tt + 1)) / (limit + 1);
+
    }
 
    @Override
