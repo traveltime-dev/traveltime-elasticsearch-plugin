@@ -9,4 +9,3 @@ target/
 build
 .idea/
 .bsp/
-gradle/gradle-wrapper.jar
