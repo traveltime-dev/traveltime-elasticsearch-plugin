@@ -13,6 +13,7 @@ import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Objects;
 
 @Setter
@@ -55,6 +56,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
    @Override
    protected Query doToQuery(QueryShardContext context) {
+      URI appUri = TraveltimePlugin.API_URI.get(context.getIndexSettings().getSettings());
       String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings());
       String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings());
       Transportation defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
@@ -66,7 +68,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       if(params.getCountry() == null) {
          params.setCountry(defaultCountry);
       }
-      return new TraveltimeSearchQuery(params, appId, apiKey);
+      return new TraveltimeSearchQuery(params, appUri, appId, apiKey);
    }
 
    @Override

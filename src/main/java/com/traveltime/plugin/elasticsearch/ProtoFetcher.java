@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.geo.GeoPoint;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,9 +42,9 @@ public class ProtoFetcher {
       }
    }
 
-   public ProtoFetcher(String id, String key) {
+   public ProtoFetcher(URI uri, String id, String key) {
       val auth = new BaseAuth(id, key);
-      val builder = TravelTimeSDK.builder().credentials(auth);
+      val builder = TravelTimeSDK.builder().baseProtoUri(uri).credentials(auth);
       api = Util.elevate(builder::build);
    }
 

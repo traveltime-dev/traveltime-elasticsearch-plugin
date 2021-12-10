@@ -8,11 +8,14 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.Weight;
 
+import java.net.URI;
+
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Getter
 public class TraveltimeSearchQuery extends Query {
    TraveltimeQueryParameters params;
+   URI appUri;
    String appId;
    String apiKey;
 

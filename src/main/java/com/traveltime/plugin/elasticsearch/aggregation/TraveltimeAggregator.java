@@ -29,6 +29,7 @@ import org.elasticsearch.search.internal.SearchContext;
 import org.elasticsearch.search.lookup.SourceLookup;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class TraveltimeAggregator extends BucketsAggregator {
    private final ValuesSourceConfig id = ValuesSourceConfig.resolve(context().getQueryShardContext(), null, "_id", null, null, null, null, CoreValuesSourceType.BYTES);
    private final ValuesSourceConfig coords = ValuesSourceConfig.resolve(context().getQueryShardContext(), null, "coords", null, null, null, null, CoreValuesSourceType.BYTES);
 
+   private final URI apiUri = TraveltimePlugin.API_URI.get(context().getQueryShardContext().getIndexSettings().getSettings());
    private final String appId = TraveltimePlugin.APP_ID.get(context().getQueryShardContext().getIndexSettings().getSettings());
    private final String apiKey = TraveltimePlugin.API_KEY.get(context().getQueryShardContext().getIndexSettings().getSettings());
 
@@ -72,12 +74,12 @@ public class TraveltimeAggregator extends BucketsAggregator {
 
    @Override
    public InternalAggregation[] buildAggregations(long[] owningBucketOrds) throws IOException {
-      return buildAggregationsForSingleBucket(owningBucketOrds, (ord, sub) -> new TraveltimeInternalAggregation(name, appId, apiKey, params, bucketDocCount(ord), sub, metadata(), docs));
+      return buildAggregationsForSingleBucket(owningBucketOrds, (ord, sub) -> new TraveltimeInternalAggregation(name, apiUri, appId, apiKey, params, bucketDocCount(ord), sub, metadata(), docs));
    }
 
    @Override
    public InternalAggregation buildEmptyAggregation() {
-      return new TraveltimeInternalAggregation(name, appId, apiKey, params, 0, null, null, docs);
+      return new TraveltimeInternalAggregation(name, apiUri, appId, apiKey, params, 0, null, null, docs);
    }
 
    public static class TraveltimeInternalAggregation extends InternalSingleBucketAggregation {
@@ -86,28 +88,32 @@ public class TraveltimeAggregator extends BucketsAggregator {
 
       final TraveltimeQueryParameters params;
 
+      private final URI apiURI;
+
       private final String appId;
 
       private final String apiKey;
 
       private final ProtoFetcher fetcher;
 
-      public TraveltimeInternalAggregation(String name, String appId, String apiKey, TraveltimeQueryParameters params, long docCount, InternalAggregations aggregations, Map<String, Object> metadata, List<DocData> internalDocs) {
+      public TraveltimeInternalAggregation(String name, URI apiURI, String appId, String apiKey, TraveltimeQueryParameters params, long docCount, InternalAggregations aggregations, Map<String, Object> metadata, List<DocData> internalDocs) {
          super(name, docCount, aggregations, metadata);
          this.internalDocs = internalDocs;
          this.params = params;
+         this.apiURI = apiURI;
          this.appId = appId;
          this.apiKey = apiKey;
-         fetcher = new ProtoFetcher(appId, apiKey);
+         fetcher = new ProtoFetcher(apiURI, appId, apiKey);
       }
 
       public TraveltimeInternalAggregation(StreamInput in) throws IOException {
          super(in);
          internalDocs = in.readList(DocData::new);
          params = new TraveltimeQueryParameters(in);
+         apiURI = URI.create(in.readString());
          appId = in.readString();
          apiKey = in.readString();
-         fetcher = new ProtoFetcher(appId, apiKey);
+         fetcher = new ProtoFetcher(apiURI, appId, apiKey);
       }
 
       @Override
@@ -115,13 +121,14 @@ public class TraveltimeAggregator extends BucketsAggregator {
          super.doWriteTo(out);
          out.writeList(internalDocs);
          params.writeTo(out);
+         out.writeString(apiURI.toString());
          out.writeString(appId);
          out.writeString(apiKey);
       }
 
       @Override
       protected InternalSingleBucketAggregation newAggregation(String name, long docCount, InternalAggregations subAggregations) {
-         return new TraveltimeInternalAggregation(name, appId, apiKey, params, docCount, subAggregations, metadata, internalDocs);
+         return new TraveltimeInternalAggregation(name, apiURI, appId, apiKey, params, docCount, subAggregations, metadata, internalDocs);
       }
 
       @Override
@@ -144,7 +151,7 @@ public class TraveltimeAggregator extends BucketsAggregator {
                .map(Tuple2::_1)
                .collect(Collectors.toList());
 
-         return new TraveltimeInternalAggregation(name, appId, apiKey, params, filteredDocs.size(), aggs, metadata, filteredDocs);
+         return new TraveltimeInternalAggregation(name, apiURI, appId, apiKey, params, filteredDocs.size(), aggs, metadata, filteredDocs);
       }
 
       @Override
