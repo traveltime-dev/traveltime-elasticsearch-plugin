@@ -1,15 +1,11 @@
 package com.traveltime.plugin.elasticsearch;
 
-import com.traveltime.plugin.elasticsearch.aggregation.TraveltimeAggregator;
-import com.traveltime.plugin.elasticsearch.aggregation.TraveltimeAggregatorBuilder;
+
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryBuilder;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryParser;
 import com.traveltime.plugin.elasticsearch.util.Util;
-import com.traveltime.sdk.TravelTimeSDK;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
-import lombok.val;
-import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
@@ -35,20 +31,6 @@ public class TraveltimePlugin extends Plugin implements SearchPlugin {
    public List<QuerySpec<?>> getQueries() {
       return List.of(
          new QuerySpec<>(TraveltimeQueryParser.NAME, TraveltimeQueryBuilder::new, new TraveltimeQueryParser())
-      );
-   }
-
-   @Override
-   public List<AggregationSpec> getAggregations() {
-      val spec = new AggregationSpec(TraveltimeAggregatorBuilder.NAME, TraveltimeAggregatorBuilder::new, TraveltimeAggregatorBuilder.PARSER);
-      spec.addResultReader(TraveltimeAggregator.TraveltimeInternalAggregation::new);
-      return List.of(spec);
-   }
-
-   @Override
-   public List<NamedWriteableRegistry.Entry> getNamedWriteables() {
-      return List.of(
-         new NamedWriteableRegistry.Entry(TraveltimeAggregatorBuilder.class, TraveltimeAggregatorBuilder.NAME, TraveltimeAggregatorBuilder::new)
       );
    }
 }
