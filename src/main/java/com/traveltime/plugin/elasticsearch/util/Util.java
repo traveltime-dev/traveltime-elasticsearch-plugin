@@ -12,9 +12,8 @@ import org.elasticsearch.common.geo.GeoPoint;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public final class Util {
    private Util() {
@@ -31,16 +30,12 @@ public final class Util {
       return new GeoPoint().resetLat(lat).resetLon(lon);
    }
 
-   public static <A> Stream<A> toStream(Iterable<A> iterable) {
-      return StreamSupport.stream(iterable.spliterator(), false);
+   public static Optional<Transportation> findModeByName(String name) {
+      return Arrays.stream(Transportation.values()).filter(it -> it.getValue().equals(name)).findFirst();
    }
 
-   public static Transportation findModeByName(String name) {
-      return Arrays.stream(Transportation.values()).filter(it -> it.getValue().equals(name)).findFirst().get();
-   }
-
-   public static Country findCountryByName(String name) {
-      return Arrays.stream(Country.values()).filter(it -> it.getValue().equals(name)).findFirst().get();
+   public static Optional<Country> findCountryByName(String name) {
+      return Arrays.stream(Country.values()).filter(it -> it.getValue().equals(name)).findFirst();
    }
 
    public static <A> A elevate(PrivilegedAction<A> expr) {
