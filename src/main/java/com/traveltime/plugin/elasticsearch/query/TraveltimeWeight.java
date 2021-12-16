@@ -9,16 +9,15 @@ import lombok.Getter;
 import lombok.experimental.ExtensionMethod;
 import lombok.val;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.DocIdSetIterator;
-import org.apache.lucene.search.Explanation;
-import org.apache.lucene.search.Scorer;
-import org.apache.lucene.search.Weight;
+import org.apache.lucene.search.*;
 import org.elasticsearch.common.geo.GeoPoint;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @ExtensionMethod(Util.class)
@@ -28,6 +27,8 @@ public class TraveltimeWeight extends Weight {
    private final TraveltimeSearchQuery ttQuery;
 
    private final Weight prefilter;
+
+   private final Logger log = LogManager.getLogger();
 
    @EqualsAndHashCode.Exclude
    private final ProtoFetcher protoFetcher;
@@ -53,22 +54,19 @@ public class TraveltimeWeight extends Weight {
       val reader = context.reader();
       val backing = reader.getSortedNumericDocValues(ttQuery.getParams().field);
 
-      DocIdSetIterator prefilterIterator = null;
+      DocIdSetIterator finalIterator;
 
-      if(prefilter != null) {
-         val prefilterScorer = prefilter.scorer(context);
-         prefilterIterator = prefilterScorer.iterator();
+      if (prefilter != null) {
+         val prefilterIterator = prefilter.scorer(context).iterator();
+         finalIterator = ConjunctionDISI.intersectIterators(List.of(prefilterIterator, backing));
       } else {
-         prefilterIterator = DocIdSetIterator.all(DocIdSetIterator.NO_MORE_DOCS);
+         finalIterator = backing;
       }
 
       val valueArray = new ArrayList<GeoPoint>();
 
-      //while (backing.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
-      while (prefilterIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS && backing.advance(prefilterIterator.docID()) != DocIdSetIterator.NO_MORE_DOCS) {
-         if (backing.docID() == prefilterIterator.docID()) {
-            valueArray.add(Util.decode(backing.nextValue()));
-         }
+      while (finalIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+         valueArray.add(Util.decode(backing.nextValue()));
       }
 
       val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
@@ -101,7 +99,6 @@ public class TraveltimeWeight extends Weight {
             return 0;
          }
       );
-
 
       return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().field));
    }

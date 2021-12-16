@@ -36,7 +36,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       limit = in.readInt();
       mode = in.readEnum(Transportation.class);
       country = in.readEnum(Country.class);
-      in.readOptionalNamedWriteable(QueryBuilder.class);
+      prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
    }
 
    @Override

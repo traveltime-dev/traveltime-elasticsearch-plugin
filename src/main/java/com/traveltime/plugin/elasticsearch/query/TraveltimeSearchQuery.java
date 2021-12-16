@@ -3,10 +3,8 @@ package com.traveltime.plugin.elasticsearch.query;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreMode;
-import org.apache.lucene.search.Weight;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +21,7 @@ public class TraveltimeSearchQuery extends Query {
 
    @Override
    public String toString(String field) {
-      return "TraveltimeSearchQuery(params = " + params.toString() + ")";
+      return String.format("TraveltimeSearchQuery(params = %s, prefilter = %s)", params, prefilter);
    }
 
    @Override
@@ -31,5 +29,11 @@ public class TraveltimeSearchQuery extends Query {
       Weight prefilterWeight = null;
       if(prefilter != null) prefilterWeight = prefilter.createWeight(searcher, scoreMode, boost);
       return new TraveltimeWeight(this, prefilterWeight);
+   }
+
+   @Override
+   public Query rewrite(IndexReader reader) throws IOException {
+      if(prefilter != null) prefilter = prefilter.rewrite(reader);
+      return this;
    }
 }
