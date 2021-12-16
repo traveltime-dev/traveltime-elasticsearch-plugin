@@ -27,12 +27,15 @@ public class TraveltimeWeight extends Weight {
    @Getter
    private final TraveltimeSearchQuery ttQuery;
 
+   private final Weight prefilter;
+
    @EqualsAndHashCode.Exclude
    private final ProtoFetcher protoFetcher;
 
-   public TraveltimeWeight(TraveltimeSearchQuery q) {
+   public TraveltimeWeight(TraveltimeSearchQuery q, Weight prefilter) {
       super(q);
       ttQuery = q;
+      this.prefilter = prefilter;
       protoFetcher = new ProtoFetcher(q.getAppUri(), q.getAppId(), q.getApiKey());
    }
 
@@ -48,21 +51,32 @@ public class TraveltimeWeight extends Weight {
    @Override
    public Scorer scorer(LeafReaderContext context) throws IOException {
       val reader = context.reader();
-
       val backing = reader.getSortedNumericDocValues(ttQuery.getParams().field);
+
+      DocIdSetIterator prefilterIterator = null;
+
+      if(prefilter != null) {
+         val prefilterScorer = prefilter.scorer(context);
+         prefilterIterator = prefilterScorer.iterator();
+      } else {
+         prefilterIterator = DocIdSetIterator.all(DocIdSetIterator.NO_MORE_DOCS);
+      }
 
       val valueArray = new ArrayList<GeoPoint>();
 
-      while (backing.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
-         valueArray.add(Util.decode(backing.nextValue()));
+      //while (backing.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+      while (prefilterIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS && backing.advance(prefilterIterator.docID()) != DocIdSetIterator.NO_MORE_DOCS) {
+         if (backing.docID() == prefilterIterator.docID()) {
+            valueArray.add(Util.decode(backing.nextValue()));
+         }
       }
 
       val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
 
       val log = LogManager.getLogger();
       int batchSize = TraveltimePlugin.BATCH_SIZE;
-      if(valueArray.size() % batchSize < batchSize * 0.5) {
-         val batchCount = Math.floor(((float) valueArray.size())/ batchSize);
+      if (valueArray.size() % batchSize < batchSize * 0.5) {
+         val batchCount = Math.floor(((float) valueArray.size()) / batchSize);
          batchSize = (int) Math.ceil(valueArray.size() / batchCount);
       }
 

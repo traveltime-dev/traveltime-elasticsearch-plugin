@@ -10,6 +10,7 @@ import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    int limit;
    Transportation mode;
    Country country;
+   QueryBuilder prefilter;
 
    public TraveltimeQueryBuilder() {
    }
@@ -34,6 +36,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       limit = in.readInt();
       mode = in.readEnum(Transportation.class);
       country = in.readEnum(Country.class);
+      in.readOptionalNamedWriteable(QueryBuilder.class);
    }
 
    @Override
@@ -43,6 +46,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeInt(limit);
       out.writeEnum(mode);
       out.writeEnum(country);
+      out.writeOptionalNamedWriteable(prefilter);
    }
 
    @Override
@@ -55,7 +59,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    }
 
    @Override
-   protected Query doToQuery(QueryShardContext context) {
+   protected Query doToQuery(QueryShardContext context) throws IOException {
       URI appUri = TraveltimePlugin.API_URI.get(context.getIndexSettings().getSettings());
       String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings());
       String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings());
@@ -68,7 +72,11 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       if(params.getCountry() == null) {
          params.setCountry(defaultCountry);
       }
-      return new TraveltimeSearchQuery(params, appUri, appId, apiKey);
+
+      Query prefilterQuery = null;
+      if (prefilter != null) prefilterQuery = prefilter.toQuery(context);
+
+      return new TraveltimeSearchQuery(params, prefilterQuery, appUri, appId, apiKey);
    }
 
    @Override
@@ -77,6 +85,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       if (!Objects.equals(this.origin, other.origin)) return false;
       if (!Objects.equals(this.mode, other.mode)) return false;
       if (!Objects.equals(this.country, other.country)) return false;
+      if (!Objects.equals(this.prefilter, other.prefilter)) return false;
       return this.limit == other.limit;
    }
 
@@ -88,6 +97,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       result = result * PRIME + this.origin.hashCode();
       result = result * PRIME + this.mode.hashCode();
       result = result * PRIME + this.country.hashCode();
+      if(prefilter != null) result = result * PRIME + prefilter.hashCode();
       result = result * PRIME + this.limit;
       return result;
    }
