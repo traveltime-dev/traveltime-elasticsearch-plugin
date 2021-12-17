@@ -12,8 +12,9 @@ import java.util.Map;
 
 public class TraveltimeScorer extends Scorer {
    protected final TraveltimeWeight weight;
-   Map<GeoPoint, Integer> pointToTime;
-   SortedNumericDocValues docs;
+   private final Map<GeoPoint, Integer> pointToTime;
+   private final SortedNumericDocValues docs;
+   private final float boost;
 
    @AllArgsConstructor
    private class TraveltimeFilteredDocs extends SortedNumericDocValues {
@@ -63,11 +64,12 @@ public class TraveltimeScorer extends Scorer {
       }
    }
 
-   public TraveltimeScorer(TraveltimeWeight w, Map<GeoPoint, Integer> coordToTime, SortedNumericDocValues docs) {
+   public TraveltimeScorer(TraveltimeWeight w, Map<GeoPoint, Integer> coordToTime, SortedNumericDocValues docs, float boost) {
       super(w);
       this.weight = w;
       this.pointToTime = coordToTime;
       this.docs = new TraveltimeFilteredDocs(docs);
+      this.boost = boost;
    }
 
    @Override
@@ -84,7 +86,7 @@ public class TraveltimeScorer extends Scorer {
    public float score() throws IOException {
       int limit = weight.getTtQuery().getParams().getLimit();
       int tt = pointToTime.getOrDefault(Util.decode(docs.nextValue()), limit + 1);
-      return ((float)(limit - tt + 1)) / (limit + 1);
+      return (boost * (limit - tt + 1)) / (limit + 1);
 
    }
 

@@ -30,7 +30,7 @@ public class TraveltimeSearchQuery extends Query {
    @Override
    public Weight createWeight(IndexSearcher searcher, ScoreMode scoreMode, float boost) throws IOException {
       Weight prefilterWeight = prefilter != null ? prefilter.createWeight(searcher, scoreMode, boost) : null;
-      return new TraveltimeWeight(this, prefilterWeight);
+      return new TraveltimeWeight(this, prefilterWeight, boost);
    }
 
    @Override
