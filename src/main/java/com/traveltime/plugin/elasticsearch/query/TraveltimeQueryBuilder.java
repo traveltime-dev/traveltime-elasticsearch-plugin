@@ -7,12 +7,16 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.apache.lucene.search.Query;
 import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.geo.GeoUtils;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.index.mapper.GeoPointFieldMapper;
+import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryShardContext;
+import org.elasticsearch.index.query.QueryShardException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -60,6 +64,19 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
    @Override
    protected Query doToQuery(QueryShardContext context) throws IOException {
+      MappedFieldType originMapping = context.fieldMapper(field);
+      if(!(originMapping instanceof GeoPointFieldMapper.GeoPointFieldType)) {
+         throw new QueryShardException(context, "field [" + field + "] is not a geo_point field");
+      }
+
+      GeoUtils.normalizePoint(origin);
+      if(!GeoUtils.isValidLatitude(origin.getLat())) {
+         throw new QueryShardException(context, "latitude invalid for origin " + origin);
+      }
+      if(!GeoUtils.isValidLongitude(origin.getLon())) {
+         throw new QueryShardException(context, "longitude invalid for origin " + origin);
+      }
+
       URI appUri = TraveltimePlugin.API_URI.get(context.getIndexSettings().getSettings());
       String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings());
       String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings());
