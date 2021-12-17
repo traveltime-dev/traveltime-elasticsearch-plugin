@@ -18,7 +18,6 @@ import org.elasticsearch.common.geo.GeoPoint;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,7 +70,7 @@ public class ProtoFetcher {
       return result.fold(
          err -> {
             logError(err);
-            return Collections.nCopies(destinations.size(), -1);
+            throw new RuntimeException(err.getMessage());
          },
          TimeFilterFastProtoResponse::getTravelTimes
       );

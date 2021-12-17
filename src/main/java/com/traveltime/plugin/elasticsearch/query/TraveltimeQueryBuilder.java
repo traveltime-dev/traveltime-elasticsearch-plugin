@@ -58,8 +58,13 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    }
 
    @Override
-   protected void doXContent(XContentBuilder builder, Params params) {
-
+   protected void doXContent(XContentBuilder builder, Params params) throws IOException {
+      builder.field("field", field);
+      builder.field("origin", origin);
+      builder.field("limit", limit);
+      builder.field("mode", mode.getValue());
+      builder.field("country", country.getValue());
+      builder.field("prefilter", prefilter);
    }
 
    @Override
@@ -102,6 +107,9 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
          } else {
             throw new IllegalStateException("Traveltime query requires either 'country' field to be present or a default country to be set in the config");
          }
+      }
+      if(params.getLimit() <= 0) {
+         throw new IllegalStateException("Traveltime limit must be greater than zero");
       }
 
       Query prefilterQuery = prefilter != null ? prefilter.toQuery(context) : null;
