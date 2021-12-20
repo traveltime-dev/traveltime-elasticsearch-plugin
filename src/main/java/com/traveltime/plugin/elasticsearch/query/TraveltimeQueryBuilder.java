@@ -96,14 +96,14 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, origin, limit, mode, country);
       if (params.getMode() == null) {
          if (defaultMode.isPresent()) {
-            params.setMode(defaultMode.get());
+            params = params.withMode(defaultMode.get());
          } else {
             throw new IllegalStateException("Traveltime query requires either 'mode' field to be present or a default mode to be set in the config");
          }
       }
       if (params.getCountry() == null) {
          if (defaultCountry.isPresent()) {
-            params.setCountry(defaultCountry.get());
+            params = params.withCountry(defaultCountry.get());
          } else {
             throw new IllegalStateException("Traveltime query requires either 'country' field to be present or a default country to be set in the config");
          }

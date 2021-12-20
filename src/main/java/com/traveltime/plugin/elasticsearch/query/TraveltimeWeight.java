@@ -55,7 +55,7 @@ public class TraveltimeWeight extends Weight {
    @Override
    public Scorer scorer(LeafReaderContext context) throws IOException {
       val reader = context.reader();
-      val backing = reader.getSortedNumericDocValues(ttQuery.getParams().field);
+      val backing = reader.getSortedNumericDocValues(ttQuery.getParams().getField());
 
       DocIdSetIterator finalIterator;
 
@@ -103,7 +103,7 @@ public class TraveltimeWeight extends Weight {
          }
       );
 
-      return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().field), boost);
+      return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().getField()), boost);
    }
 
    @Override
