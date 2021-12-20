@@ -1,5 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
+import com.traveltime.plugin.elasticsearch.TraveltimeCache;
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
 import com.traveltime.plugin.elasticsearch.util.Util;
@@ -102,6 +103,8 @@ public class TraveltimeWeight extends Weight {
             return 0;
          }
       );
+
+      TraveltimeCache.INSTANCE.add(ttQuery, pointToTime);
 
       return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().getField()), boost);
    }

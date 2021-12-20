@@ -1,6 +1,7 @@
 package com.traveltime.plugin.elasticsearch;
 
 
+import com.traveltime.plugin.elasticsearch.query.TraveltimeFetchPhase;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryBuilder;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryParser;
 import com.traveltime.plugin.elasticsearch.util.Util;
@@ -9,6 +10,7 @@ import com.traveltime.sdk.dto.requests.proto.Transportation;
 import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SearchPlugin;
+import org.elasticsearch.search.fetch.FetchSubPhase;
 
 import java.net.URI;
 import java.util.List;
@@ -33,5 +35,10 @@ public class TraveltimePlugin extends Plugin implements SearchPlugin {
       return List.of(
          new QuerySpec<>(TraveltimeQueryParser.NAME, TraveltimeQueryBuilder::new, new TraveltimeQueryParser())
       );
+   }
+
+   @Override
+   public List<FetchSubPhase> getFetchSubPhases(FetchPhaseConstructionContext context) {
+      return List.of(new TraveltimeFetchPhase());
    }
 }

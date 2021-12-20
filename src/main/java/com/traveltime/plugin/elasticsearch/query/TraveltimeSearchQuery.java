@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreMode;
-import org.apache.lucene.search.Weight;
+import org.apache.lucene.search.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,6 +18,14 @@ public class TraveltimeSearchQuery extends Query {
    private final URI appUri;
    private final String appId;
    private final String apiKey;
+
+   @Override
+   public void visit(QueryVisitor visitor) {
+      if(prefilter != null) {
+         prefilter.visit(visitor);
+      }
+      super.visit(visitor);
+   }
 
    @Override
    public String toString(String field) {
