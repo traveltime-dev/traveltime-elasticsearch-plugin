@@ -33,6 +33,7 @@ dependencies {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.locationtech.jts'
     }
+    implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
     implementation 'io.vavr:vavr:0.10.4'
     implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.6'
 }
