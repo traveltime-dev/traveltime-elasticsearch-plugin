@@ -2,7 +2,8 @@ package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
-import lombok.*;
+import lombok.Data;
+import lombok.With;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;

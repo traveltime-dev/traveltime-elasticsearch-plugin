@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Function;
 
-
 public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder> {
    public static String NAME = "traveltime";
    private final ParseField field = new ParseField("field");

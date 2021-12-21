@@ -1,13 +1,12 @@
 package com.traveltime.plugin.elasticsearch.query;
 
-import com.traveltime.plugin.elasticsearch.TraveltimeCache;
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
+import com.traveltime.plugin.elasticsearch.TraveltimeCache;
 import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
 import com.traveltime.plugin.elasticsearch.util.Util;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.experimental.ExtensionMethod;
 import lombok.val;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@ExtensionMethod(Util.class)
 @EqualsAndHashCode(callSuper = false)
 public class TraveltimeWeight extends Weight {
    @Getter

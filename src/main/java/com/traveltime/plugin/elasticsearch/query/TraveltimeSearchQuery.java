@@ -21,7 +21,7 @@ public class TraveltimeSearchQuery extends Query {
 
    @Override
    public void visit(QueryVisitor visitor) {
-      if(prefilter != null) {
+      if (prefilter != null) {
          prefilter.visit(visitor);
       }
       super.visit(visitor);
@@ -41,7 +41,7 @@ public class TraveltimeSearchQuery extends Query {
    @Override
    public Query rewrite(IndexReader reader) throws IOException {
       Query newPrefilter = prefilter != null ? prefilter.rewrite(reader) : null;
-      if(newPrefilter == prefilter) {
+      if (newPrefilter == prefilter) {
          return super.rewrite(reader);
       } else {
          return new TraveltimeSearchQuery(params, newPrefilter, appUri, appId, apiKey);

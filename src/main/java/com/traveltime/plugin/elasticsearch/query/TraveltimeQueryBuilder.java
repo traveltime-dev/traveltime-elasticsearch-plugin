@@ -42,8 +42,16 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       field = in.readString();
       origin = in.readGeoPoint();
       limit = in.readInt();
-      mode = in.readEnum(Transportation.class);
-      country = in.readEnum(Country.class);
+      if (in.readBoolean()) {
+         mode = in.readEnum(Transportation.class);
+      } else {
+         mode = null;
+      }
+      if (in.readBoolean()) {
+         country = in.readEnum(Country.class);
+      } else {
+         country = null;
+      }
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
    }
 
@@ -52,8 +60,10 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeString(field);
       out.writeGeoPoint(origin);
       out.writeInt(limit);
-      out.writeEnum(mode);
-      out.writeEnum(country);
+      out.writeBoolean(mode != null);
+      if (mode != null) out.writeEnum(mode);
+      out.writeBoolean(country != null);
+      if (country != null) out.writeEnum(country);
       out.writeOptionalNamedWriteable(prefilter);
    }
 
@@ -62,23 +72,23 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("field", field);
       builder.field("origin", origin);
       builder.field("limit", limit);
-      builder.field("mode", mode.getValue());
-      builder.field("country", country.getValue());
+      builder.field("mode", mode == null ? null : mode.getValue());
+      builder.field("country", country == null ? null : country.getValue());
       builder.field("prefilter", prefilter);
    }
 
    @Override
    protected Query doToQuery(QueryShardContext context) throws IOException {
       MappedFieldType originMapping = context.fieldMapper(field);
-      if(!(originMapping instanceof GeoPointFieldMapper.GeoPointFieldType)) {
+      if (!(originMapping instanceof GeoPointFieldMapper.GeoPointFieldType)) {
          throw new QueryShardException(context, "field [" + field + "] is not a geo_point field");
       }
 
       GeoUtils.normalizePoint(origin);
-      if(!GeoUtils.isValidLatitude(origin.getLat())) {
+      if (!GeoUtils.isValidLatitude(origin.getLat())) {
          throw new QueryShardException(context, "latitude invalid for origin " + origin);
       }
-      if(!GeoUtils.isValidLongitude(origin.getLon())) {
+      if (!GeoUtils.isValidLongitude(origin.getLon())) {
          throw new QueryShardException(context, "longitude invalid for origin " + origin);
       }
 
@@ -108,7 +118,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
             throw new IllegalStateException("Traveltime query requires either 'country' field to be present or a default country to be set in the config");
          }
       }
-      if(params.getLimit() <= 0) {
+      if (params.getLimit() <= 0) {
          throw new IllegalStateException("Traveltime limit must be greater than zero");
       }
 
@@ -133,9 +143,9 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       int result = 1;
       result = result * PRIME + this.field.hashCode();
       result = result * PRIME + this.origin.hashCode();
-      result = result * PRIME + (this.mode == null ? 0 : this.mode.hashCode());
-      result = result * PRIME + (this.country == null ? 0 : this.country.hashCode());
-      result = result * PRIME + (this.prefilter == null ? 0 : this.prefilter.hashCode());
+      result = result * PRIME + Objects.hashCode(this.mode);
+      result = result * PRIME + Objects.hashCode(this.country);
+      result = result * PRIME + Objects.hashCode(this.prefilter);
       result = result * PRIME + this.limit;
       return result;
    }
