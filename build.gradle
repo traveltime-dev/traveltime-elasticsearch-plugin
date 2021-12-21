@@ -9,7 +9,7 @@ buildscript {
 }
 
 group = 'com.traveltime'
-version = '0.2.0'
+version = '0.2-SNAPSHOT'
 
 repositories {
     maven {
@@ -39,7 +39,7 @@ dependencies {
 }
 
 task pluginZip(dependsOn: jar, type: Zip) {
-    baseName project.name
+    archiveName project.name + ".zip"
     from configurations.runtime.allArtifacts.files
     from configurations.runtimeClasspath
     from "src/universal/" include '*'
