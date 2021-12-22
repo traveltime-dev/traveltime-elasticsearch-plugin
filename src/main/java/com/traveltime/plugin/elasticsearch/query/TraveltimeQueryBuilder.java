@@ -15,8 +15,8 @@ import org.elasticsearch.index.mapper.GeoPointFieldMapper;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.index.query.QueryShardException;
+import org.elasticsearch.index.query.SearchExecutionContext;
 
 import java.io.IOException;
 import java.net.URI;
@@ -78,7 +78,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    }
 
    @Override
-   protected Query doToQuery(QueryShardContext context) throws IOException {
+   protected Query doToQuery(SearchExecutionContext context) throws IOException {
       MappedFieldType originMapping = context.getFieldType(field);
       if (!(originMapping instanceof GeoPointFieldMapper.GeoPointFieldType)) {
          throw new QueryShardException(context, "field [" + field + "] is not a geo_point field");

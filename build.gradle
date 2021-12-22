@@ -8,8 +8,8 @@ buildscript {
     }
 }
 
-def esMajorMinor = '7.11'
-def esRevisions = ['0', '1', '2', '3-SNAPSHOT']
+def esMajorMinor = '7.12'
+def esRevisions = ['0', '1', '2-SNAPSHOT']
 def realMax = esRevisions.findAll{it.isInteger() }.max()
 
 group = 'com.traveltime'
