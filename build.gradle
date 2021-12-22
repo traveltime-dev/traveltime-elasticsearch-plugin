@@ -8,8 +8,13 @@ buildscript {
     }
 }
 
+def esMajorMinor = '7.10'
+def esRevisions = [0, 1, 2]
+
+
 group = 'com.traveltime'
-version = '0.2-SNAPSHOT'
+def compositeVersion = project.findProperty('tag').toString() ?: "v0.2-SNAPSHOT_${esMajorMinor}.${esRevisions.max()}"
+version = compositeVersion.split('_')[0]
 
 repositories {
     maven {
@@ -28,7 +33,7 @@ compileJava {
 }
 
 dependencies {
-    compileOnly 'org.elasticsearch:elasticsearch:7.10.2'
+    compileOnly "org.elasticsearch:elasticsearch:${esMajorMinor}.${esRevisions.max()}"
     implementation('com.traveltime:traveltime-sdk-java:1.1.0') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.locationtech.jts'
@@ -38,9 +43,22 @@ dependencies {
     implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.6'
 }
 
-task pluginZip(dependsOn: jar, type: Zip) {
-    archiveName project.name + ".zip"
-    from configurations.runtime.allArtifacts.files
-    from configurations.runtimeClasspath
-    from "src/universal/" include '*'
+task pluginZip
+
+esRevisions.forEach { revision ->
+    project.task("makeProperties_${revision}", type: Copy) {
+        from "src/universal/plugin-descriptor.properties"
+        into "$buildDir/generated_${revision}"
+        filter { line -> line.replaceAll('ES_VERSION', "${esMajorMinor}.${revision}").replaceAll('PLUGIN_VERSION', "${version}") }
+    }
+
+    project.task("pluginZip_${revision}", dependsOn: [jar, "makeProperties_${revision}"], type: Zip) {
+        archiveName project.name + "_${esMajorMinor}.${revision}_${project.version}.zip"
+        from configurations.runtime.allArtifacts.files
+        from configurations.runtimeClasspath
+        from "$buildDir/generated_${revision}" include '*'
+        from "src/universal/plugin-security.policy"
+    }
+
+    pluginZip.dependsOn("pluginZip_${revision}")
 }
