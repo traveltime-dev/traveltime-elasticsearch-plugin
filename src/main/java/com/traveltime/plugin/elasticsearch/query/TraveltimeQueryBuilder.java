@@ -79,7 +79,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
    @Override
    protected Query doToQuery(QueryShardContext context) throws IOException {
-      MappedFieldType originMapping = context.fieldMapper(field);
+      MappedFieldType originMapping = context.getFieldType(field);
       if (!(originMapping instanceof GeoPointFieldMapper.GeoPointFieldType)) {
          throw new QueryShardException(context, "field [" + field + "] is not a geo_point field");
       }

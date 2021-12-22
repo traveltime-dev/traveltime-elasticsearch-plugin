@@ -43,7 +43,7 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
       TraveltimeQueryParameters params = finder.getUniqueParam();
       if (params == null) return null;
 
-      FieldFetcher fieldFetcher = FieldFetcher.create(fetchContext.mapperService(), fetchContext.searchLookup(), List.of(new FieldAndFormat(params.getField(), null)));
+      FieldFetcher fieldFetcher = FieldFetcher.create(fetchContext.getQueryShardContext(), fetchContext.searchLookup(), List.of(new FieldAndFormat(params.getField(), null)));
 
 
       return new FetchSubPhaseProcessor() {
