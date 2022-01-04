@@ -46,10 +46,12 @@ dependencies {
 task pluginZip
 
 esRevisions.forEach { revision ->
+    def realRevisions = revision.replaceAll("-SNAPSHOT", "")
+
     project.task("makeProperties_${revision}", type: Copy) {
         from "src/universal/plugin-descriptor.properties"
         into "$buildDir/generated_${revision}"
-        filter { line -> line.replaceAll('ES_VERSION', "${esMajorMinor}.${revision}").replaceAll('PLUGIN_VERSION', "${version}") }
+        filter { line -> line.replaceAll('ES_VERSION', "${esMajorMinor}.${realRevisions}").replaceAll('PLUGIN_VERSION', "${version}") }
     }
 
     project.task("pluginZip_${revision}", dependsOn: [jar, "makeProperties_${revision}"], type: Zip) {
