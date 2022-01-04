@@ -2,7 +2,7 @@ package com.traveltime.plugin.elasticsearch;
 
 import com.traveltime.plugin.elasticsearch.util.Util;
 import com.traveltime.sdk.TravelTimeSDK;
-import com.traveltime.sdk.auth.BaseAuth;
+import com.traveltime.sdk.auth.TravelTimeCredentials;
 import com.traveltime.sdk.dto.requests.TimeFilterFastProtoRequest;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.OneToMany;
@@ -29,7 +29,7 @@ public class ProtoFetcher {
    private void logError(TravelTimeError left) {
       if (left instanceof IOError) {
          val ioerr = (IOError) left;
-         log.warn(ioerr.getCause().getMessage());
+         log.warn(ioerr.getMessage());
          log.warn(
             Arrays.stream(ioerr.getCause().getStackTrace())
                .map(StackTraceElement::toString)
@@ -42,7 +42,7 @@ public class ProtoFetcher {
    }
 
    public ProtoFetcher(URI uri, String id, String key) {
-      val auth = new BaseAuth(id, key);
+      val auth = TravelTimeCredentials.builder().appId(id).apiKey(key).build();
       val builder = TravelTimeSDK.builder().baseProtoUri(uri).credentials(auth);
       api = Util.elevate(builder::build);
    }
