@@ -2,7 +2,6 @@ package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.TraveltimeCache;
-import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
 import com.traveltime.plugin.elasticsearch.util.Util;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
@@ -76,7 +75,7 @@ public class TraveltimeWeight extends Weight {
 
       val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
 
-      int batchSize = TraveltimePlugin.BATCH_SIZE;
+      int batchSize = ttQuery.getBatchSize();
       if (valueArray.size() % batchSize < batchSize * 0.5) {
          val batchCount = Math.floor(((float) valueArray.size()) / batchSize);
          batchSize = (int) Math.ceil(valueArray.size() / batchCount);

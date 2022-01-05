@@ -101,6 +101,12 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       if (apiKey.isEmpty()) {
          throw new IllegalStateException("Traveltime api key must be set in the config");
       }
+
+      Integer batchSize = TraveltimePlugin.BATCH_SIZE.get(context.getIndexSettings().getSettings());
+      if(batchSize <= 0) {
+         throw new IllegalStateException("Traveltime batch size must be greater than zero");
+      }
+
       Optional<Transportation> defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
       Optional<Country> defaultCountry = TraveltimePlugin.DEFAULT_COUNTRY.get(context.getIndexSettings().getSettings());
       TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, origin, limit, mode, country);
@@ -124,7 +130,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Query prefilterQuery = prefilter != null ? prefilter.toQuery(context) : null;
 
-      return new TraveltimeSearchQuery(params, prefilterQuery, appUri, appId, apiKey);
+      return new TraveltimeSearchQuery(params, prefilterQuery, appUri, appId, apiKey, batchSize);
    }
 
    @Override
