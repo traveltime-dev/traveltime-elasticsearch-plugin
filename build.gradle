@@ -13,7 +13,7 @@ def esRevisions = ['0', '1', '2', '3-SNAPSHOT']
 def realMax = esRevisions.findAll{it.isInteger() }.max()
 
 group = 'com.traveltime'
-def compositeVersion = project.findProperty('tag').toString() ?: "v0.2-SNAPSHOT_${esMajorMinor}.${realMax}"
+def compositeVersion = (project.findProperty('tag') ?: "v0.2-SNAPSHOT_${esMajorMinor}.${realMax}").toString()
 version = compositeVersion.split('_')[0]
 
 repositories {
