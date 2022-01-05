@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 @EqualsAndHashCode(callSuper = false)
 public class TraveltimeWeight extends Weight {
@@ -36,12 +34,16 @@ public class TraveltimeWeight extends Weight {
    @EqualsAndHashCode.Exclude
    private final ProtoFetcher protoFetcher;
 
+   @EqualsAndHashCode.Exclude
+   private final ExecutorService executor;
+
    public TraveltimeWeight(TraveltimeSearchQuery q, Weight prefilter, float boost) {
       super(q);
       ttQuery = q;
       this.prefilter = prefilter;
       this.boost = boost;
       protoFetcher = new ProtoFetcher(q.getAppUri(), q.getAppId(), q.getApiKey());
+      executor = Executors.newFixedThreadPool(4);
    }
 
    @Override
@@ -76,7 +78,7 @@ public class TraveltimeWeight extends Weight {
       val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
 
       int batchSize = ttQuery.getBatchSize();
-      if (valueArray.size() % batchSize < batchSize * 0.5) {
+      if (valueArray.size() > batchSize && valueArray.size() % batchSize < batchSize * 0.5) {
          val batchCount = Math.floor(((float) valueArray.size()) / batchSize);
          batchSize = (int) Math.ceil(valueArray.size() / batchCount);
       }
@@ -92,6 +94,7 @@ public class TraveltimeWeight extends Weight {
              ttQuery.getParams().getMode(),
              ttQuery.getParams().getCountry()
          ));
+         executor.submit(batchResult);
          futureResults.add(batchResult);
       }
 
@@ -99,7 +102,9 @@ public class TraveltimeWeight extends Weight {
       for (Future<List<Integer>> future : futureResults) {
          try {
             for (Integer time : future.get()) {
-               pointToTime.put(valueArray.get(index), time.intValue());
+               if(time > 0) {
+                  pointToTime.put(valueArray.get(index), time.intValue());
+               }
                index += 1;
             }
          } catch (InterruptedException | ExecutionException e) {
