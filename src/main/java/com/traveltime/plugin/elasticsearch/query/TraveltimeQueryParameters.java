@@ -5,8 +5,8 @@ import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.Data;
 import lombok.With;
 import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.xcontent.ToXContent;
+import org.elasticsearch.xcontent.XContentBuilder;
 
 import java.io.IOException;
 

@@ -8,7 +8,7 @@ buildscript {
     }
 }
 
-def esMajorMinor = '7.15'
+def esMajorMinor = '7.16'
 def esRevisions = ['0', '1', '2', '3-SNAPSHOT']
 def realMax = esRevisions.findAll{it.isInteger() }.max()
 
