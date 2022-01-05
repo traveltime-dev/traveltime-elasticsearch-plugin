@@ -93,8 +93,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       }
 
       URI appUri = TraveltimePlugin.API_URI.get(context.getIndexSettings().getSettings());
-      String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings());
-      String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings());
+      String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings()).toString();
+      String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings()).toString();
       if (appId.isEmpty()) {
          throw new IllegalStateException("Traveltime app id must be set in the config");
       }
