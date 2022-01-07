@@ -10,13 +10,10 @@ import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.geo.GeoUtils;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.index.mapper.GeoPointFieldMapper;
 import org.elasticsearch.index.mapper.MappedFieldType;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryShardException;
-import org.elasticsearch.index.query.SearchExecutionContext;
 
 import java.io.IOException;
 import java.net.URI;
@@ -78,6 +75,12 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    }
 
    @Override
+   protected QueryBuilder doRewrite(QueryRewriteContext queryRewriteContext) throws IOException {
+      if(this.prefilter != null) this.prefilter = this.prefilter.rewrite(queryRewriteContext);
+      return super.doRewrite(queryRewriteContext);
+   }
+
+   @Override
    protected Query doToQuery(SearchExecutionContext context) throws IOException {
       MappedFieldType originMapping = context.getFieldType(field);
       if (!(originMapping instanceof GeoPointFieldMapper.GeoPointFieldType)) {
@@ -93,8 +96,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       }
 
       URI appUri = TraveltimePlugin.API_URI.get(context.getIndexSettings().getSettings());
-      String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings()).toString();
-      String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings()).toString();
+      String appId = TraveltimePlugin.APP_ID.get(context.getIndexSettings().getSettings());
+      String apiKey = TraveltimePlugin.API_KEY.get(context.getIndexSettings().getSettings());
       if (appId.isEmpty()) {
          throw new IllegalStateException("Traveltime app id must be set in the config");
       }
