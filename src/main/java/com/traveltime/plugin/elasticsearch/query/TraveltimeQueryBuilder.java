@@ -13,10 +13,7 @@ import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.mapper.GeoPointFieldMapper;
 import org.elasticsearch.index.mapper.MappedFieldType;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryShardContext;
-import org.elasticsearch.index.query.QueryShardException;
+import org.elasticsearch.index.query.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -75,6 +72,12 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("mode", mode == null ? null : mode.getValue());
       builder.field("country", country == null ? null : country.getValue());
       builder.field("prefilter", prefilter);
+   }
+
+   @Override
+   protected QueryBuilder doRewrite(QueryRewriteContext queryRewriteContext) throws IOException {
+      if(this.prefilter != null) this.prefilter = this.prefilter.rewrite(queryRewriteContext);
+      return super.doRewrite(queryRewriteContext);
    }
 
    @Override
