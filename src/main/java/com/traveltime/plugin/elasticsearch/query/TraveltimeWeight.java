@@ -63,7 +63,9 @@ public class TraveltimeWeight extends Weight {
       DocIdSetIterator finalIterator;
 
       if (prefilter != null) {
-         val prefilterIterator = prefilter.scorer(context).iterator();
+         val preScorer = prefilter.scorer(context);
+         if(preScorer == null) return null;
+         val prefilterIterator = preScorer.iterator();
          finalIterator = ConjunctionDISI.intersectIterators(List.of(prefilterIterator, backing));
       } else {
          finalIterator = backing;
