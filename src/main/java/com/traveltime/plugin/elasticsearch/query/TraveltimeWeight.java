@@ -1,5 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
+import com.traveltime.plugin.elasticsearch.FetcherSingleton;
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.TraveltimeCache;
 import com.traveltime.plugin.elasticsearch.util.Util;
@@ -18,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
 
 @EqualsAndHashCode(callSuper = false)
 public class TraveltimeWeight extends Weight {
@@ -34,16 +34,12 @@ public class TraveltimeWeight extends Weight {
    @EqualsAndHashCode.Exclude
    private final ProtoFetcher protoFetcher;
 
-   @EqualsAndHashCode.Exclude
-   private final ExecutorService executor;
-
    public TraveltimeWeight(TraveltimeSearchQuery q, Weight prefilter, float boost) {
       super(q);
       ttQuery = q;
       this.prefilter = prefilter;
       this.boost = boost;
-      protoFetcher = new ProtoFetcher(q.getAppUri(), q.getAppId(), q.getApiKey());
-      executor = Executors.newFixedThreadPool(4);
+      protoFetcher = FetcherSingleton.INSTANCE.getFetcher(q.getAppUri(), q.getAppId(), q.getApiKey());
    }
 
    @Override
@@ -79,39 +75,16 @@ public class TraveltimeWeight extends Weight {
 
       val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
 
-      int batchSize = ttQuery.getBatchSize();
-      if (valueArray.size() > batchSize && valueArray.size() % batchSize < batchSize * 0.5) {
-         val batchCount = Math.floor(((float) valueArray.size()) / batchSize);
-         batchSize = (int) Math.ceil(valueArray.size() / batchCount);
-      }
+      val results = protoFetcher.getTimes(
+          ttQuery.getParams().getOrigin(),
+          valueArray,
+          ttQuery.getParams().getLimit(),
+          ttQuery.getParams().getMode(),
+          ttQuery.getParams().getCountry()
+      );
 
-      val futureResults = new ArrayList<Future<List<Integer>>>();
-
-      for (int offset = 0; offset < valueArray.size(); offset += batchSize) {
-         val batch = valueArray.subList(offset, Math.min(offset + batchSize, valueArray.size()));
-         val batchResult = new FutureTask<>(() -> protoFetcher.getTimes(
-             ttQuery.getParams().getOrigin(),
-             batch,
-             ttQuery.getParams().getLimit(),
-             ttQuery.getParams().getMode(),
-             ttQuery.getParams().getCountry()
-         ));
-         executor.submit(batchResult);
-         futureResults.add(batchResult);
-      }
-
-      int index = 0;
-      for (Future<List<Integer>> future : futureResults) {
-         try {
-            for (Integer time : future.get()) {
-               if(time > 0) {
-                  pointToTime.put(valueArray.get(index), time.intValue());
-               }
-               index += 1;
-            }
-         } catch (InterruptedException | ExecutionException e) {
-            throw new IOException(e);
-         }
+      for (int index = 0; index < results.size(); index++) {
+         pointToTime.put(valueArray.get(index), results.get(index).intValue());
       }
 
       TraveltimeCache.INSTANCE.add(ttQuery, pointToTime);
