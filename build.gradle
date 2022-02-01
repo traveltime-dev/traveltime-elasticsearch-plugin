@@ -34,7 +34,7 @@ compileJava {
 
 dependencies {
     compileOnly "org.elasticsearch:elasticsearch:${esMajorMinor}.${realMax}"
-    implementation('com.traveltime:traveltime-sdk-java:1.1.9') {
+    implementation('com.traveltime:traveltime-sdk-java:1.1.10') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.locationtech.jts'
     }
