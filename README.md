@@ -1,8 +1,11 @@
 # traveltime-elasticsearch-plugin
 Plugin for Elasticsearch that allows users to filter locations using the Traveltime API.
 
+## Repository structure
+We maintain separate codebases for each ElasticSearch version between 7.10 and 7.16 (inclusive). They reside in the appropriate branches (e.g. the plugin for version 7.16 is in the `7.16` branch).
+
 ## Installation & configuration 
-This is a standard Elasticsearch plugin. As such it can be installed by running `elasticsearch-plugin install https://github.com/traveltime-dev/traveltime-elasticsearch-plugin/releases/download/v0.2.10/traveltime-elasticsearch-plugin-0.2.0.zip`
+This is a standard Elasticsearch plugin. As such it can be installed by running `elasticsearch-plugin install https://github.com/traveltime-dev/traveltime-elasticsearch-plugin/releases/download/v0.2.20_7.16/traveltime-elasticsearch-plugin_7.16.1_v0.2.20.zip`
 
 To use the plugin you **must** specify the following configuration keys:
  - `traveltime.app.id`: this is you API app id.
