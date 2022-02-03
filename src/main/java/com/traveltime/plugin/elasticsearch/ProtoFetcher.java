@@ -65,7 +65,7 @@ public class ProtoFetcher {
 
 
       log.info(String.format("Fetching %d destinations", destinations.size()));
-      val result = Util.time(log, () -> Util.elevate(() -> api.sendProtoBatched(fastProto)));
+      val result = Util.time(log, () -> Util.elevate(() -> api.sendProto(fastProto)));
 
       return result.fold(
          err -> {
