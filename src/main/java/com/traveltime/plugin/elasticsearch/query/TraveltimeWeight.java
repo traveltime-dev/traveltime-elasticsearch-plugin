@@ -105,7 +105,9 @@ public class TraveltimeWeight extends Weight {
       );
 
       for (int index = 0; index < results.size(); index++) {
-         pointToTime.put(valueArray.get(index), results.get(index).intValue());
+         if(results.get(index) > 0) {
+            pointToTime.put(valueArray.get(index), results.get(index).intValue());
+         }
       }
 
       return new TraveltimeScorer(this, pointToTime, DocIdSetIterator.all(reader.maxDoc()), reader.getSortedNumericDocValues(ttQuery.getParams().getField()), boost);
