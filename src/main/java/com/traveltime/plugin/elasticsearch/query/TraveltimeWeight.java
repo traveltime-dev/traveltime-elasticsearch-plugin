@@ -84,7 +84,9 @@ public class TraveltimeWeight extends Weight {
       );
 
       for (int index = 0; index < results.size(); index++) {
-         pointToTime.put(valueArray.get(index), results.get(index).intValue());
+         if(results.get(index) > 0) {
+            pointToTime.put(valueArray.get(index), results.get(index).intValue());
+         }
       }
 
       TraveltimeCache.INSTANCE.add(ttQuery, pointToTime);
