@@ -76,7 +76,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
    @Override
    protected QueryBuilder doRewrite(QueryRewriteContext queryRewriteContext) throws IOException {
-      if(this.prefilter != null) this.prefilter = this.prefilter.rewrite(queryRewriteContext);
+      if (this.prefilter != null) this.prefilter = this.prefilter.rewrite(queryRewriteContext);
       return super.doRewrite(queryRewriteContext);
    }
 
@@ -106,7 +106,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       }
 
       Integer batchSize = TraveltimePlugin.BATCH_SIZE.get(context.getIndexSettings().getSettings());
-      if(batchSize <= 0) {
+      if (batchSize <= 0) {
          throw new IllegalStateException("Traveltime batch size must be greater than zero");
       }
 

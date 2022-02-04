@@ -2,6 +2,7 @@ package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.util.Util;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
@@ -13,27 +14,14 @@ import java.util.Map;
 public class TraveltimeScorer extends Scorer {
    protected final TraveltimeWeight weight;
    private final Map<GeoPoint, Integer> pointToTime;
-   private final SortedNumericDocValues docs;
+   private final TraveltimeFilteredDocs docs;
    private final float boost;
 
    @AllArgsConstructor
-   private class TraveltimeFilteredDocs extends SortedNumericDocValues {
-      SortedNumericDocValues backing;
-
-      @Override
-      public long nextValue() throws IOException {
-         return backing.nextValue();
-      }
-
-      @Override
-      public int docValueCount() {
-         return 1;
-      }
-
-      @Override
-      public boolean advanceExact(int target) throws IOException {
-         return backing.advanceExact(target) && pointToTime.containsKey(Util.decode(nextValue()));
-      }
+   @Getter
+   private class TraveltimeFilteredDocs extends DocIdSetIterator {
+      private final DocIdSetIterator backing;
+      SortedNumericDocValues backingCoords;
 
       @Override
       public int docID() {
@@ -43,7 +31,11 @@ public class TraveltimeScorer extends Scorer {
       @Override
       public int nextDoc() throws IOException {
          int id = backing.nextDoc();
-         while (id != DocIdSetIterator.NO_MORE_DOCS && !pointToTime.containsKey(Util.decode(nextValue()))) {
+         while (id != DocIdSetIterator.NO_MORE_DOCS) {
+            backingCoords.setDocument(id);
+            if (backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
+               return id;
+            }
             id = backing.nextDoc();
          }
          return id;
@@ -51,8 +43,10 @@ public class TraveltimeScorer extends Scorer {
 
       @Override
       public int advance(int target) throws IOException {
-         if (advanceExact(target)) {
-            return target;
+         int id = backing.advance(target);
+         backingCoords.setDocument(id);
+         if (backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
+            return id;
          } else {
             return nextDoc();
          }
@@ -60,15 +54,15 @@ public class TraveltimeScorer extends Scorer {
 
       @Override
       public long cost() {
-         return backing.cost() * 1000;
+         return backing.cost() * 100;
       }
    }
 
-   public TraveltimeScorer(TraveltimeWeight w, Map<GeoPoint, Integer> coordToTime, SortedNumericDocValues docs, float boost) {
+   public TraveltimeScorer(TraveltimeWeight w, Map<GeoPoint, Integer> coordToTime, DocIdSetIterator docs, SortedNumericDocValues coords, float boost) {
       super(w);
       this.weight = w;
       this.pointToTime = coordToTime;
-      this.docs = new TraveltimeFilteredDocs(docs);
+      this.docs = new TraveltimeFilteredDocs(docs, coords);
       this.boost = boost;
    }
 
@@ -78,16 +72,15 @@ public class TraveltimeScorer extends Scorer {
    }
 
    @Override
-   public float getMaxScore(int upTo) {
-      return 1;
+   public float score() {
+      int limit = weight.getTtQuery().getParams().getLimit();
+      int tt = pointToTime.getOrDefault(Util.decode(docs.backingCoords.valueAt(0)), limit + 1);
+      return boost * (limit - tt + 1) / (limit + 1);
    }
 
    @Override
-   public float score() throws IOException {
-      int limit = weight.getTtQuery().getParams().getLimit();
-      int tt = pointToTime.getOrDefault(Util.decode(docs.nextValue()), limit + 1);
-      return (boost * (limit - tt + 1)) / (limit + 1);
-
+   public int freq() {
+      return 0;
    }
 
    @Override

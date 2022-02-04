@@ -8,8 +8,8 @@ buildscript {
     }
 }
 
-def esMajorMinor = '7.10'
-def esRevisions = ['0', '1', '2', '3-SNAPSHOT']
+def esMajorMinor = '5.5'
+def esRevisions = ['0', '1', '2', '3']
 def realMax = esRevisions.findAll{it.isInteger() }.max()
 
 group = 'com.traveltime'
@@ -28,8 +28,8 @@ apply plugin: "io.freefair.lombok"
 apply plugin: 'java'
 
 compileJava {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 dependencies {
@@ -60,6 +60,7 @@ esRevisions.forEach { revision ->
         from configurations.runtimeClasspath
         from "$buildDir/generated_${revision}" include '*'
         from "src/universal/plugin-security.policy"
+        into 'elasticsearch'
     }
 
     pluginZip.dependsOn("pluginZip_${revision}")

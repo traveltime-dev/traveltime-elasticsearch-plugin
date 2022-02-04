@@ -6,9 +6,8 @@ import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.geo.GeoUtils;
 import org.elasticsearch.common.xcontent.ContextParser;
 import org.elasticsearch.common.xcontent.ObjectParser;
-import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.index.query.QueryParser;
 
 import java.io.IOException;
@@ -24,7 +23,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
    private final ParseField country = new ParseField("country");
    private final ParseField prefilter = new ParseField("prefilter");
 
-   private final ContextParser<Void, QueryBuilder> prefilterParser = (p, c) -> AbstractQueryBuilder.parseInnerQueryBuilder(p);
+   private final ContextParser<Void, QueryBuilder> prefilterParser = (p, c) -> new QueryParseContext(p).parseInnerQueryBuilder().orElse(null);
 
    private final ObjectParser<TraveltimeQueryBuilder, Void> queryParser = new ObjectParser<>(NAME, TraveltimeQueryBuilder::new);
 
@@ -35,15 +34,11 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
       queryParser.declareString((qb, s) -> qb.setMode(findByNameOrError("transportation mode", s, Util::findModeByName)), mode);
       queryParser.declareString((qb, s) -> qb.setCountry(findByNameOrError("country", s, Util::findCountryByName)), country);
       queryParser.declareObject(TraveltimeQueryBuilder::setPrefilter, prefilterParser, prefilter);
-
-      queryParser.declareRequiredFieldSet(field.toString());
-      queryParser.declareRequiredFieldSet(origin.toString());
-      queryParser.declareRequiredFieldSet(limit.toString());
    }
 
    private static <T> T findByNameOrError(String what, String name, Function<String, Optional<T>> finder) {
       Optional<T> result = finder.apply(name);
-      if (result.isEmpty()) {
+      if (!result.isPresent()) {
          throw new IllegalArgumentException(String.format("Couldn't find a %s with the name %s", what, name));
       } else {
          return result.get();
@@ -51,11 +46,11 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
    }
 
    @Override
-   public TraveltimeQueryBuilder fromXContent(XContentParser parser) throws IOException {
+   public Optional<TraveltimeQueryBuilder> fromXContent(QueryParseContext parseContext) throws IOException {
       try {
-         return queryParser.parse(parser, null);
+         return Optional.of(queryParser.parse(parseContext.parser(), null));
       } catch (IllegalArgumentException iae) {
-         throw new ParsingException(parser.getTokenLocation(), iae.getMessage(), iae);
+         throw new ParsingException(parseContext.parser().getTokenLocation(), iae.getMessage(), iae);
       }
    }
 }

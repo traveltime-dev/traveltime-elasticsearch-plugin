@@ -15,8 +15,10 @@ public class TraveltimeQueryParameters implements ToXContent {
    private final String field;
    private final GeoPoint origin;
    private final int limit;
-   @With private final Transportation mode;
-   @With private final Country country;
+   @With
+   private final Transportation mode;
+   @With
+   private final Country country;
 
    @Override
    public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {

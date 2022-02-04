@@ -31,9 +31,9 @@ public class ProtoFetcher {
          val ioerr = (IOError) left;
          log.warn(ioerr.getMessage());
          log.warn(
-            Arrays.stream(ioerr.getCause().getStackTrace())
-               .map(StackTraceElement::toString)
-               .reduce("", (a, b) -> a + "\n\t" + b)
+             Arrays.stream(ioerr.getCause().getStackTrace())
+                 .map(StackTraceElement::toString)
+                 .reduce("", (a, b) -> a + "\n\t" + b)
          );
       } else if (left instanceof ResponseError) {
          val error = (ResponseError) left;
@@ -49,30 +49,30 @@ public class ProtoFetcher {
 
    public List<Integer> getTimes(GeoPoint origin, List<GeoPoint> destinations, int limit, Transportation mode, Country country) {
       val fastProto =
-         TimeFilterFastProtoRequest
-            .builder()
-            .oneToMany(
-               OneToMany
-                  .builder()
-                  .country(country)
-                  .transportation(mode)
-                  .originCoordinate(Util.toCoord(origin))
-                  .destinationCoordinates(destinations.stream().map(Util::toCoord).collect(Collectors.toList()))
-                  .travelTime(limit)
-                  .build()
-            )
-            .build();
+          TimeFilterFastProtoRequest
+              .builder()
+              .oneToMany(
+                  OneToMany
+                      .builder()
+                      .country(country)
+                      .transportation(mode)
+                      .originCoordinate(Util.toCoord(origin))
+                      .destinationCoordinates(destinations.stream().map(Util::toCoord).collect(Collectors.toList()))
+                      .travelTime(limit)
+                      .build()
+              )
+              .build();
 
 
       log.info(String.format("Fetching %d destinations", destinations.size()));
-      val result = Util.time(log, () -> Util.elevate(() -> api.sendProtoBatched(fastProto)));
+      val result = Util.time(log, () -> Util.elevate(() -> api.sendProto(fastProto)));
 
       return result.fold(
-         err -> {
-            logError(err);
-            throw new RuntimeException(err.getMessage());
-         },
-         TimeFilterFastProtoResponse::getTravelTimes
+          err -> {
+             logError(err);
+             throw new RuntimeException(err.getMessage());
+          },
+          TimeFilterFastProtoResponse::getTravelTimes
       );
    }
 

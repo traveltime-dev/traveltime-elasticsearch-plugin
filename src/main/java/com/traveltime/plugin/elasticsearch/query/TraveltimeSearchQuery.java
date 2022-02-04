@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Weight;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,22 +23,14 @@ public class TraveltimeSearchQuery extends Query {
    private final Integer batchSize;
 
    @Override
-   public void visit(QueryVisitor visitor) {
-      if (prefilter != null) {
-         prefilter.visit(visitor);
-      }
-      super.visit(visitor);
-   }
-
-   @Override
    public String toString(String field) {
       return String.format("TraveltimeSearchQuery(params = %s, prefilter = %s)", params, prefilter);
    }
 
    @Override
-   public Weight createWeight(IndexSearcher searcher, ScoreMode scoreMode, float boost) throws IOException {
-      Weight prefilterWeight = prefilter != null ? prefilter.createWeight(searcher, scoreMode, boost) : null;
-      return new TraveltimeWeight(this, prefilterWeight, boost);
+   public Weight createWeight(IndexSearcher searcher, boolean scoreMode) throws IOException {
+      Weight prefilterWeight = prefilter != null ? prefilter.createWeight(searcher, scoreMode) : null;
+      return new TraveltimeWeight(this, prefilterWeight);
    }
 
    @Override
