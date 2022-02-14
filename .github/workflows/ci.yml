@@ -11,9 +11,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    #TODO ES image should be ${{github.ref_name}}.[0, 1, 2, 3]
     env:
-      ES_IMAGE: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+      ES_IMAGE: docker.elastic.co/elasticsearch/elasticsearch:7.16.0
 
 
     steps:
@@ -30,7 +29,7 @@ jobs:
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
-        arguments: -Ptag=${{github.ref_name}} pluginZip
+        arguments: pluginZip
 
     - name: Pull elastic docker image
       run: docker pull $ES_IMAGE
@@ -48,10 +47,9 @@ jobs:
         $ES_IMAGE \
         /opt/docker/start.sh
 
-      #TODO figure out if there is a proper way to wait for ES to go up or timeout
-    - name: wait 30s for elasticsearch to go up
+    - name: wait 20s for elasticsearch to go up
       run: |
-        sleep 30
+        sleep 20
 #      ES has a healthcheck endpoint, maybe that can be used
 #      run: curl -XGET http://localhost:9200/_cluster/health?pretty=true&timeout=30s
 
