@@ -1,7 +1,8 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.util.Util;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
@@ -13,16 +14,30 @@ import java.util.Map;
 public class TraveltimeScorer extends Scorer {
    protected final TraveltimeWeight weight;
    private final Map<GeoPoint, Integer> pointToTime;
-   private final SortedNumericDocValues docs;
+   private final TraveltimeFilteredDocs docs;
    private final float boost;
 
-   @AllArgsConstructor
+   @RequiredArgsConstructor
    private class TraveltimeFilteredDocs extends SortedNumericDocValues {
-      SortedNumericDocValues backing;
+      private final SortedNumericDocValues backing;
+
+      @Getter
+      private long currentValue = 0;
+      private boolean currentValueDirty = true;
+      private void invalidateCurrentValue() {
+         currentValueDirty = true;
+      }
+      private void advanceValue() throws IOException {
+         if(currentValueDirty) {
+            currentValue = backing.nextValue();
+            currentValueDirty = false;
+         }
+      }
 
       @Override
       public long nextValue() throws IOException {
-         return backing.nextValue();
+         advanceValue();
+         return currentValue;
       }
 
       @Override
@@ -32,6 +47,7 @@ public class TraveltimeScorer extends Scorer {
 
       @Override
       public boolean advanceExact(int target) throws IOException {
+         invalidateCurrentValue();
          return backing.advanceExact(target) && pointToTime.containsKey(Util.decode(nextValue()));
       }
 
@@ -43,8 +59,10 @@ public class TraveltimeScorer extends Scorer {
       @Override
       public int nextDoc() throws IOException {
          int id = backing.nextDoc();
+         invalidateCurrentValue();
          while (id != DocIdSetIterator.NO_MORE_DOCS && !pointToTime.containsKey(Util.decode(nextValue()))) {
             id = backing.nextDoc();
+            invalidateCurrentValue();
          }
          return id;
       }

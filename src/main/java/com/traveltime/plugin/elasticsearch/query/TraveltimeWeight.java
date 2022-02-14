@@ -72,8 +72,9 @@ public class TraveltimeWeight extends Weight {
       val valueSet = new LongOpenHashSet();
 
       while (finalIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
-         if(!valueSet.add(backing.nextValue())) {
-            valueArray.add(Util.decode(backing.nextValue()));
+         long encodedCoords = backing.nextValue();
+         if(!valueSet.add(encodedCoords)) {
+            valueArray.add(Util.decode(encodedCoords));
          }
       }
 
