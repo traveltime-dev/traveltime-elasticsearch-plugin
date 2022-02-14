@@ -3,6 +3,7 @@ package com.traveltime.plugin.elasticsearch.query;
 import com.traveltime.plugin.elasticsearch.FetcherSingleton;
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.util.Util;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -85,11 +86,12 @@ public class TraveltimeWeight extends Weight {
       Bits live = reader.getLiveDocs();
 
       val valueArray = new ArrayList<GeoPoint>();
+      val valueSet = new LongOpenHashSet();
 
       while (docs.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
          if (live != null && !live.get(docs.docID())) continue;
          coords.setDocument(docs.docID());
-         if (coords.count() > 0) {
+         if (coords.count() > 0 && !valueSet.add(coords.valueAt(0))) {
             valueArray.add(Util.decode(coords.valueAt(0)));
          }
       }
