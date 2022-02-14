@@ -4,6 +4,7 @@ import com.traveltime.plugin.elasticsearch.FetcherSingleton;
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.TraveltimeCache;
 import com.traveltime.plugin.elasticsearch.util.Util;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -68,9 +69,13 @@ public class TraveltimeWeight extends Weight {
       }
 
       val valueArray = new ArrayList<GeoPoint>();
+      val valueSet = new LongOpenHashSet();
 
       while (finalIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
-         valueArray.add(Util.decode(backing.nextValue()));
+         long encodedCoords = backing.nextValue();
+         if(!valueSet.add(encodedCoords)) {
+            valueArray.add(Util.decode(encodedCoords));
+         }
       }
 
       val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
