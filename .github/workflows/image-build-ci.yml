@@ -1,0 +1,48 @@
+name: ES image with TT plugin CI
+
+on:
+  push:
+    branches:
+      - "7.16"
+jobs:
+  ci-image:
+
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: es-with-tt
+
+    steps:
+
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+          settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
+        with:
+          arguments: pluginZip
+
+      - name: Build ES image with plugin
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Run image
+        run: |
+          docker run --detach \
+                -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300   \
+                -e "discovery.type=single-node" \
+                -e "traveltime.app.id=${{ secrets.TTP_ID }}" \
+                -e "traveltime.api.key=${{ secrets.TTP_KEY }}" \
+                $IMAGE_NAME
+
+      - name: wait 20s for elasticsearch to go up
+        run: |
+          sleep 20
+
+      - name: curl at elasticsearch
+        run: curl http://localhost:9200
