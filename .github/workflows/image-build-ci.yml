@@ -3,7 +3,13 @@ name: ES image with TT plugin CI
 on:
   push:
     branches:
-      - "7.16"
+      - "7.1[0-6]"
+      - "5.5"
+  pull_request:
+    branches:
+      - "7.1[0-6]*"
+      - "5.5*"
+
 jobs:
   ci-image:
 
@@ -27,6 +33,18 @@ jobs:
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
         with:
           arguments: pluginZip
+
+      - name: Set version variable - on push = branch name; on PR = target branch name
+        shell: bash
+        run: |
+          # Short name for current branch. For PRs, use target branch (base ref)
+          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+
+      - name: Prepare Dockerfile
+        run: |
+          cp Dockerfile.template Dockerfile
+          sed -i 's/{version}/${{env.GIT_BRANCH}}/' Dockerfile
 
       - name: Build ES image with plugin
         run: docker build -t $IMAGE_NAME .
