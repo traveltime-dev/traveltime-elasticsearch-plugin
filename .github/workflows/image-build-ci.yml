@@ -46,7 +46,7 @@ jobs:
           sed 's/{version}/${{env.GIT_BRANCH}}/' Dockerfile.template > Dockerfile
 
       - name: Adjust image name in case of v 5.5
-        if: ${{ env.GIT_BRANCH  == "5.5" }}
+        if: ${{ env.GIT_BRANCH  == '5.5' }}
         run: sed '1 s/-SNAPSHOT//' Dockerfile
 
       - name: Build ES image with plugin
