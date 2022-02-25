@@ -1,4 +1,4 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:{version}.0-SNAPSHOT
+FROM docker.elastic.co/elasticsearch/elasticsearch:{version}.0
 
 COPY build/distributions/* /distributions/
 
