@@ -8,6 +8,8 @@ buildscript {
     }
 }
 
+apply plugin: 'java-library'
+
 subprojects {
     group = 'com.traveltime'
 
@@ -60,6 +62,7 @@ subprojects {
 
             project.task("pluginZip_${revision}", dependsOn: [project.jar, "makeProperties_${revision}"], type: Zip) {
                 archiveName project.name + "_${esVersion}.${revision}_${project.version}.zip"
+                destinationDir rootProject.distsDir
                 from configurations.runtime.allArtifacts.files
                 from configurations.runtimeClasspath
                 from "$buildDir/generated_${revision}" include '*'
