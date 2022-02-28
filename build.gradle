@@ -40,13 +40,10 @@ subprojects {
     }
 
     ext.buildPlugin = { project, esVersion, esRevisions ->
-        def realMax = esRevisions.findAll{it.isInteger() }.max()
-
-        def compositeVersion = (project.findProperty('tag') ?: "v0.2-SNAPSHOT_${esVersion}.${realMax}").toString()
-        project.version = compositeVersion.split('_')[0]
+        project.version = project.findProperty('tag') ?: "v0.2-SNAPSHOT"
 
         project.dependencies {
-            compileOnly "org.elasticsearch:elasticsearch:${esVersion}.${realMax}"
+            compileOnly "org.elasticsearch:elasticsearch:${esVersion}.${esRevisions.findAll{ it.isInteger() }.max()}"
         }
 
         project.task("pluginZip")
@@ -61,7 +58,7 @@ subprojects {
             }
 
             project.task("pluginZip_${revision}", dependsOn: [project.jar, "makeProperties_${revision}"], type: Zip) {
-                archiveName project.name + "_${esVersion}.${revision}_${project.version}.zip"
+                archiveName rootProject.name + "_${project.version}_${esVersion}.${revision}.zip"
                 destinationDir rootProject.distsDir
                 from configurations.runtime.allArtifacts.files
                 from configurations.runtimeClasspath
