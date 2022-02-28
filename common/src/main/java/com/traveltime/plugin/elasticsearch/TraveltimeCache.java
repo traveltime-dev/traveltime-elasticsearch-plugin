@@ -22,7 +22,7 @@ public enum TraveltimeCache {
          .newBuilder()
          .maximumSize(1000)
          .expireAfterAccess(1, TimeUnit.MINUTES)
-         .build(new CacheLoader<>() {
+         .build(new CacheLoader<TraveltimeQueryParameters, ReadWriteLock>() {
             @NotNull
             @Override
             public ReadWriteLock load(@NotNull TraveltimeQueryParameters key) {
@@ -35,7 +35,7 @@ public enum TraveltimeCache {
          .newBuilder()
          .maximumSize(1000)
          .expireAfterAccess(1, TimeUnit.MINUTES)
-         .build(new CacheLoader<>() {
+         .build(new CacheLoader<TraveltimeQueryParameters, Map<Coordinates, Integer>>() {
             @NotNull
             @Override
             public Map<Coordinates, Integer> load(@NotNull TraveltimeQueryParameters key) {

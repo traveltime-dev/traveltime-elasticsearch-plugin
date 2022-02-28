@@ -1,1 +1,6 @@
 buildPlugin(this, '5.5', ['0', '1', '2', '3'])
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
