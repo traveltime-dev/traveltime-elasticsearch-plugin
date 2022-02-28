@@ -1,0 +1,28 @@
+apply plugin: "io.freefair.lombok"
+
+apply plugin: 'java'
+
+group = 'com.traveltime'
+
+repositories {
+    maven {
+        url = 'https://snapshots.elastic.co/maven/'
+    }
+    mavenCentral()
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+dependencies {
+    implementation('com.traveltime:traveltime-sdk-java:1.1.11') {
+        exclude group: 'com.fasterxml.jackson.core'
+        exclude group: 'org.locationtech.jts'
+    }
+    implementation('org.apache.logging.log4j:log4j-api:2.17.0')
+    implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
+    //implementation 'io.vavr:vavr:0.10.4'
+    implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.6'
+}

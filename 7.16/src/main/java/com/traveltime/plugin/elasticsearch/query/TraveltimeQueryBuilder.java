@@ -1,6 +1,7 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
+import com.traveltime.sdk.dto.common.Coordinates;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.NonNull;
@@ -112,7 +113,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Optional<Transportation> defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
       Optional<Country> defaultCountry = TraveltimePlugin.DEFAULT_COUNTRY.get(context.getIndexSettings().getSettings());
-      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, origin, limit, mode, country);
+      Coordinates originCoord = Coordinates.builder().lat(origin.lat()).lng(origin.getLon()).build();
+      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country);
       if (params.getMode() == null) {
          if (defaultMode.isPresent()) {
             params = params.withMode(defaultMode.get());

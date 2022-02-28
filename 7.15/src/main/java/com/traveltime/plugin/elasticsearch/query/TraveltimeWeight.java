@@ -4,6 +4,7 @@ import com.traveltime.plugin.elasticsearch.FetcherSingleton;
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.TraveltimeCache;
 import com.traveltime.plugin.elasticsearch.util.Util;
+import com.traveltime.sdk.dto.common.Coordinates;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
+import org.elasticsearch.SpecialPermission;
 import org.elasticsearch.common.geo.GeoPoint;
 
 import java.io.IOException;
@@ -40,7 +42,7 @@ public class TraveltimeWeight extends Weight {
       ttQuery = q;
       this.prefilter = prefilter;
       this.boost = boost;
-      protoFetcher = FetcherSingleton.INSTANCE.getFetcher(q.getAppUri(), q.getAppId(), q.getApiKey());
+      protoFetcher = FetcherSingleton.INSTANCE.getFetcher(q.getAppUri(), q.getAppId(), q.getApiKey(), SpecialPermission::new);
    }
 
    @Override
@@ -68,7 +70,7 @@ public class TraveltimeWeight extends Weight {
          finalIterator = backing;
       }
 
-      val valueArray = new ArrayList<GeoPoint>();
+      val valueArray = new ArrayList<Coordinates>();
       val valueSet = new LongOpenHashSet();
 
       while (finalIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
@@ -78,7 +80,7 @@ public class TraveltimeWeight extends Weight {
          }
       }
 
-      val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
+      val pointToTime = new Object2IntOpenHashMap<Coordinates>(valueArray.size());
 
       val results = protoFetcher.getTimes(
           ttQuery.getParams().getOrigin(),
@@ -94,7 +96,7 @@ public class TraveltimeWeight extends Weight {
          }
       }
 
-      TraveltimeCache.INSTANCE.add(ttQuery, pointToTime);
+      TraveltimeCache.INSTANCE.add(ttQuery.getParams(), pointToTime);
 
       return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().getField()), boost);
    }

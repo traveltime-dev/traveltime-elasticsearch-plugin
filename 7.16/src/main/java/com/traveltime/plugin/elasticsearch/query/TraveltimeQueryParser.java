@@ -3,13 +3,13 @@ package com.traveltime.plugin.elasticsearch.query;
 import com.traveltime.plugin.elasticsearch.util.Util;
 import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.geo.GeoUtils;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryParser;
 import org.elasticsearch.xcontent.ContextParser;
 import org.elasticsearch.xcontent.ObjectParser;
 import org.elasticsearch.xcontent.ParseField;
 import org.elasticsearch.xcontent.XContentParser;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryParser;
 
 import java.io.IOException;
 import java.util.Optional;

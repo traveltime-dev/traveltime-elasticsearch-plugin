@@ -10,7 +10,7 @@ buildscript {
 
 apply plugin: 'java-library'
 
-subprojects {
+configure(subprojects.findAll {it.name.matches("[1-9]\\.[0-9]+")} ) {
     group = 'com.traveltime'
 
     repositories {
@@ -30,6 +30,7 @@ subprojects {
     }
 
     dependencies {
+        implementation project(':common')
         implementation('com.traveltime:traveltime-sdk-java:1.1.11') {
             exclude group: 'com.fasterxml.jackson.core'
             exclude group: 'org.locationtech.jts'

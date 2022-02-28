@@ -3,6 +3,7 @@ package com.traveltime.plugin.elasticsearch.query;
 import com.traveltime.plugin.elasticsearch.FetcherSingleton;
 import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.util.Util;
+import com.traveltime.sdk.dto.common.Coordinates;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
@@ -17,7 +18,7 @@ import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Weight;
 import org.apache.lucene.util.Bits;
-import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.SpecialPermission;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class TraveltimeWeight extends Weight {
       super(q);
       ttQuery = q;
       this.prefilter = prefilter;
-      protoFetcher = FetcherSingleton.INSTANCE.getFetcher(q.getAppUri(), q.getAppId(), q.getApiKey());
+      protoFetcher = FetcherSingleton.INSTANCE.getFetcher(q.getAppUri(), q.getAppId(), q.getApiKey(), SpecialPermission::new);
    }
 
    @Override
@@ -85,7 +86,7 @@ public class TraveltimeWeight extends Weight {
       }
       Bits live = reader.getLiveDocs();
 
-      val valueArray = new ArrayList<GeoPoint>();
+      val valueArray = new ArrayList<Coordinates>();
       val valueSet = new LongOpenHashSet();
 
       while (docs.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
@@ -96,7 +97,7 @@ public class TraveltimeWeight extends Weight {
          }
       }
 
-      val pointToTime = new Object2IntOpenHashMap<GeoPoint>(valueArray.size());
+      val pointToTime = new Object2IntOpenHashMap<Coordinates>(valueArray.size());
 
       val results = protoFetcher.getTimes(
           ttQuery.getParams().getOrigin(),

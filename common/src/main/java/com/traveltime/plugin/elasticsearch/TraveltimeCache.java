@@ -4,10 +4,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryParameters;
-import com.traveltime.plugin.elasticsearch.query.TraveltimeSearchQuery;
+import com.traveltime.sdk.dto.common.Coordinates;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.val;
-import org.elasticsearch.common.geo.GeoPoint;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -31,7 +30,7 @@ public enum TraveltimeCache {
             }
          });
 
-   private final LoadingCache<TraveltimeQueryParameters, Map<GeoPoint, Integer>> cache =
+   private final LoadingCache<TraveltimeQueryParameters, Map<Coordinates, Integer>> cache =
       CacheBuilder
          .newBuilder()
          .maximumSize(1000)
@@ -39,14 +38,14 @@ public enum TraveltimeCache {
          .build(new CacheLoader<>() {
             @NotNull
             @Override
-            public Map<GeoPoint, Integer> load(@NotNull TraveltimeQueryParameters key) {
-               val res = new Object2IntOpenHashMap<GeoPoint>();
+            public Map<Coordinates, Integer> load(@NotNull TraveltimeQueryParameters key) {
+               val res = new Object2IntOpenHashMap<Coordinates>();
                res.defaultReturnValue(-1);
                return res;
             }
          });
 
-   public Integer get(TraveltimeQueryParameters params, GeoPoint point) {
+   public Integer get(TraveltimeQueryParameters params, Coordinates point) {
       val results = cache.getUnchecked(params);
       val lock = locks.getUnchecked(params);
       lock.readLock().lock();
@@ -55,9 +54,9 @@ public enum TraveltimeCache {
       return res;
    }
 
-   public void add(TraveltimeSearchQuery query, Map<GeoPoint, Integer> results) {
-      val map = cache.getUnchecked(query.getParams());
-      val lock = locks.getUnchecked(query.getParams());
+   public void add(TraveltimeQueryParameters params, Map<Coordinates, Integer> results) {
+      val map = cache.getUnchecked(params);
+      val lock = locks.getUnchecked(params);
 
       lock.writeLock().lock();
       map.putAll(results);

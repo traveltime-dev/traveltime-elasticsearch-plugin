@@ -1,4 +1,5 @@
 rootProject.name = 'traveltime-elasticsearch-plugin'
+include 'common'
 include '5.5'
 include '7.10'
 include '7.11'
