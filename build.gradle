@@ -1,0 +1,74 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath "io.freefair.gradle:lombok-plugin:5.3.0"
+    }
+}
+
+apply plugin: 'java-library'
+
+configure(subprojects.findAll {it.name.matches("[1-9]\\.[0-9]+")} ) {
+    group = 'com.traveltime'
+
+    repositories {
+        maven {
+            url = 'https://snapshots.elastic.co/maven/'
+        }
+        mavenCentral()
+    }
+
+    apply plugin: "io.freefair.lombok"
+
+    apply plugin: 'java'
+
+    compileJava {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    dependencies {
+        implementation project(':common')
+        implementation('com.traveltime:traveltime-sdk-java:1.1.11') {
+            exclude group: 'com.fasterxml.jackson.core'
+            exclude group: 'org.locationtech.jts'
+        }
+        implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
+        implementation 'io.vavr:vavr:0.10.4'
+        implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.6'
+    }
+
+    ext.buildPlugin = { project, esVersion, esRevisions ->
+        project.version = project.findProperty('tag') ?: "v0.2-SNAPSHOT"
+
+        project.dependencies {
+            compileOnly "org.elasticsearch:elasticsearch:${esVersion}.${esRevisions.findAll{ it.isInteger() }.max()}"
+        }
+
+        project.task("pluginZip")
+
+        esRevisions.forEach { revision ->
+            def realRevision = revision.replaceAll("-SNAPSHOT", "")
+
+            project.task("makeProperties_${revision}", type: Copy) {
+                from "src/universal/plugin-descriptor.properties"
+                into "$buildDir/generated_${revision}"
+                filter { line -> line.replaceAll('ES_VERSION', "${esVersion}.${realRevision}").replaceAll('PLUGIN_VERSION', "${version}") }
+            }
+
+            project.task("pluginZip_${revision}", dependsOn: [project.jar, "makeProperties_${revision}"], type: Zip) {
+                archiveName rootProject.name + "_${project.version}_${esVersion}.${revision}.zip"
+                destinationDir rootProject.distsDir
+                from configurations.runtime.allArtifacts.files
+                from configurations.runtimeClasspath
+                from "$buildDir/generated_${revision}" include '*'
+                from "src/universal/plugin-security.policy"
+            }
+
+            project.pluginZip.dependsOn("pluginZip_${revision}")
+        }
+    }
+}
+
