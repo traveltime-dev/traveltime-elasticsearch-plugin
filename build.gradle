@@ -108,9 +108,14 @@ configure(subprojects - common) {
             into project.distsDir
         }
 
+        task("mock_server", type: Copy) {
+            from "${common.projectDir.path}/bin/mock-proto-server"
+            into project.distsDir
+        }
+
         def imageName = "${project.version.toString().toLowerCase()}_${esVersion}-test"
 
-        task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script"]) {
+        task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script", "mock_server"]) {
             environment "DOCKER_BUILDKIT", "1"
             commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", imageName
         }
