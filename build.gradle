@@ -10,7 +10,9 @@ buildscript {
 
 apply plugin: 'java-library'
 
-configure(subprojects.findAll {it.name.matches("[1-9]\\.[0-9]+")} ) {
+def common = project(':common')
+
+configure(subprojects - common) {
     group = 'com.traveltime'
 
     repositories {
@@ -30,7 +32,9 @@ configure(subprojects.findAll {it.name.matches("[1-9]\\.[0-9]+")} ) {
     }
 
     dependencies {
-        implementation project(':common')
+        implementation(common) {
+            exclude group: 'org.apache.logging.log4j'
+        }
         implementation('com.traveltime:traveltime-sdk-java:1.1.11') {
             exclude group: 'com.fasterxml.jackson.core'
             exclude group: 'org.locationtech.jts'
@@ -68,6 +72,45 @@ configure(subprojects.findAll {it.name.matches("[1-9]\\.[0-9]+")} ) {
             }
 
             project.pluginZip.dependsOn("pluginZip_${revision}")
+        }
+
+        task("Dockerfile", type: Copy) {
+            from "${common.projectDir.path}/src/universal/Dockerfile.template"
+            into buildDir
+            rename { "Dockerfile" }
+            filter { line -> line.replaceAll('PLUGIN_VERSION', "${version}").replaceAll('ES_VERSION', "${esVersion}") }
+        }
+
+        task("dockerignore", type: Copy) {
+            from "${common.projectDir.path}/src/universal/.dockerignore.template"
+            into buildDir
+            rename { ".dockerignore" }
+            filter { line -> line.replaceAll('PLUGIN_VERSION', "${version}").replaceAll('ES_VERSION', "${esVersion}") }
+        }
+
+        task("testZip", type: Copy, dependsOn: "pluginZip_0") {
+            from "${rootProject.distsDir}/${rootProject.name + "_${project.version}_${esVersion}.0.zip"}"
+            into project.distsDir
+        }
+
+        task("wait_script", type: Copy) {
+            from "${common.projectDir.path}/src/universal/wait-for-startup.sh"
+            into project.distsDir
+        }
+
+        task("test_data", type: Copy) {
+            from "${common.projectDir.path}/src/universal/part0"
+            into project.distsDir
+        }
+
+        task("load_script", type: Copy) {
+            from "${common.projectDir.path}/src/universal/load-data.sh"
+            into project.distsDir
+        }
+
+        task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script"]) {
+            environment "DOCKER_BUILDKIT", "1"
+            commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", "${project.version.toString().toLowerCase()}_${esVersion}-test"
         }
     }
 }

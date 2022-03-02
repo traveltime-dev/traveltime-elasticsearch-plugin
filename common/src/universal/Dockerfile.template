@@ -1,0 +1,8 @@
+FROM docker.elastic.co/elasticsearch/elasticsearch:ES_VERSION.0
+
+COPY build/distributions/wait-for-startup.sh ./
+COPY build/distributions/part0 ./
+COPY build/distributions/load-data.sh ./
+COPY build/distributions/traveltime-elasticsearch-plugin_PLUGIN_VERSION_ES_VERSION.0.zip /distributions/
+
+RUN bin/elasticsearch-plugin install --batch file:///distributions/traveltime-elasticsearch-plugin_PLUGIN_VERSION_ES_VERSION.0.zip

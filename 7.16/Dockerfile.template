@@ -1,5 +1,0 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:{version}.0
-
-COPY build/distributions/* /distributions/
-
-RUN bin/elasticsearch-plugin install --batch file:///distributions/traveltime-elasticsearch-plugin_{version}.0_v0.2-SNAPSHOT.zip
