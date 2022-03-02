@@ -78,14 +78,14 @@ configure(subprojects - common) {
             from "${common.projectDir.path}/src/universal/Dockerfile.template"
             into buildDir
             rename { "Dockerfile" }
-            filter { line -> line.replaceAll('ES_VERSION', "${esVersion}") }
+            filter { line -> line.replaceAll('PLUGIN_VERSION', "${version}").replaceAll('ES_VERSION', "${esVersion}") }
         }
 
         task("dockerignore", type: Copy) {
             from "${common.projectDir.path}/src/universal/.dockerignore.template"
             into buildDir
             rename { ".dockerignore" }
-            filter { line -> line.replaceAll('ES_VERSION', "${esVersion}") }
+            filter { line -> line.replaceAll('PLUGIN_VERSION', "${version}").replaceAll('ES_VERSION', "${esVersion}") }
         }
 
         task("testZip", type: Copy, dependsOn: "pluginZip_0") {
@@ -93,7 +93,22 @@ configure(subprojects - common) {
             into project.distsDir
         }
 
-        task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip"]) {
+        task("wait_script", type: Copy) {
+            from "${common.projectDir.path}/src/universal/wait-for-startup.sh"
+            into project.distsDir
+        }
+
+        task("test_data", type: Copy) {
+            from "${common.projectDir.path}/src/universal/part0"
+            into project.distsDir
+        }
+
+        task("load_script", type: Copy) {
+            from "${common.projectDir.path}/src/universal/load-data.sh"
+            into project.distsDir
+        }
+
+        task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script"]) {
             environment "DOCKER_BUILDKIT", "1"
             commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", "${project.version.toString().toLowerCase()}_${esVersion}-test"
         }
