@@ -108,9 +108,16 @@ configure(subprojects - common) {
             into project.distsDir
         }
 
+        def imageName = "${project.version.toString().toLowerCase()}_${esVersion}-test"
+
         task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script"]) {
             environment "DOCKER_BUILDKIT", "1"
-            commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", "${project.version.toString().toLowerCase()}_${esVersion}-test"
+            commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", imageName
+        }
+
+        task("dockerTest", type: Exec, dependsOn: dockerBuildTest) {
+            environment "IMAGE_NAME", imageName
+            commandLine "bash", "${common.projectDir.path}/src/universal/run-tests.sh"
         }
     }
 }
