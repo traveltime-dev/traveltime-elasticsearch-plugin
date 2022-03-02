@@ -95,7 +95,7 @@ configure(subprojects - common) {
 
         task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip"]) {
             environment "DOCKER_BUILDKIT", "1"
-            commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", "${project.version}_${esVersion}-test"
+            commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", "${project.version.toString().toLowerCase()}_${esVersion}-test"
         }
     }
 }
