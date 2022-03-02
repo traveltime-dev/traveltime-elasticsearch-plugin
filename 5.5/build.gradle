@@ -1,6 +1,11 @@
-buildPlugin(this, '5.5', ['0', '1', '2', '3'])
+def revisions = ['0', '1', '2', '3']
+buildPlugin(this, '5.5', revisions)
 
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+revisions.forEach {
+    project.tasks.findByPath("pluginZip_$it").configure { into 'elasticsearch' }
 }
