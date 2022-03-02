@@ -74,7 +74,7 @@ public class TraveltimeWeight extends Weight {
 
       while (finalIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
          long encodedCoords = backing.nextValue();
-         if(!valueSet.add(encodedCoords)) {
+         if(valueSet.add(encodedCoords)) {
             valueArray.add(Util.decode(encodedCoords));
          }
       }
