@@ -92,7 +92,7 @@ public class TraveltimeWeight extends Weight {
       while (docs.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
          if (live != null && !live.get(docs.docID())) continue;
          coords.setDocument(docs.docID());
-         if (coords.count() > 0 && !valueSet.add(coords.valueAt(0))) {
+         if (coords.count() > 0 && valueSet.add(coords.valueAt(0))) {
             valueArray.add(Util.decode(coords.valueAt(0)));
          }
       }

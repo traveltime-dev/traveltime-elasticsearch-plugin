@@ -9,3 +9,7 @@ compileJava {
 revisions.forEach {
     project.tasks.findByPath("pluginZip_$it").configure { into 'elasticsearch' }
 }
+
+project.tasks.findByPath("load_script").configure {
+    from "src/universal/load-data.sh"
+}
