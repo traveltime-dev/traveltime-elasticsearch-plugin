@@ -14,7 +14,7 @@ docker run -d \
   --name $IMAGE_NAME \
   $IMAGE_NAME
 
-docker exec $IMAGE_NAME ./mock-proto-server 80 &
+docker exec $IMAGE_NAME ./mock-proto-server --port 80 &
 docker exec $IMAGE_NAME ./wait-for-startup.sh
 docker exec $IMAGE_NAME ./load-data.sh
 
