@@ -14,13 +14,15 @@ docker run -d \
   --name $IMAGE_NAME \
   $IMAGE_NAME
 
-docker exec $IMAGE_NAME ./mock-proto-server 80 &
+docker exec $IMAGE_NAME ./mock-proto-server --port 80 &
 docker exec $IMAGE_NAME ./wait-for-startup.sh
 docker exec $IMAGE_NAME ./load-data.sh
+sleep 5
 
+docker exec $IMAGE_NAME curl -H 'Content-Type: application/json' -d "$(cat test_case_1.json)" "localhost:9200/london/_search" \
+  | jq '.hits.hits[]._source.id' > actual_results_1
 
-
-docker exec $IMAGE_NAME curl -X POST -H 'Content-Type: application/json' -d'{"query": {"traveltime": {"limit": 6200,"field": "coords","origin": {"lat": 51.509865,"lon": -0.118092},"mode": "pt","country": "uk"}},"_source": false}' "localhost:9200/london/_search"
+cmp -s actual_results_1 expected_results_1
 
 docker stop $IMAGE_NAME
 trap EXIT
