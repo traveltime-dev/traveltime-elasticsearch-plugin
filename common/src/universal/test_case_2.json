@@ -1,0 +1,29 @@
+{
+  "query": {
+    "traveltime": {
+      "limit": 6200,
+      "field": "coords",
+      "origin": {
+        "lat": 51.509865,
+        "lon": -0.118092
+      },
+      "mode": "pt",
+      "country": "uk",
+      "prefilter": {
+        "bool": {
+          "filter": [
+            {
+              "range": {
+                "bedrooms": {
+                  "gte": 4
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "_source": true,
+  "size": 3
+}
