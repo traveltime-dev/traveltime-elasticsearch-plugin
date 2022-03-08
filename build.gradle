@@ -115,14 +115,30 @@ configure(subprojects - common) {
 
         def imageName = "${project.version.toString().toLowerCase()}_${esVersion}-test"
 
-        task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script", "mock_server"]) {
+        def dockerBuildTest = task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script", "mock_server"]) {
             environment "DOCKER_BUILDKIT", "1"
             commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", imageName
         }
 
-        task("dockerTest", type: Exec, dependsOn: dockerBuildTest) {
+        task("dockerTest", type: Exec, dependsOn: ["dockerBuildTest"] ) {
             environment "IMAGE_NAME", imageName
+            workingDir project.distsDir
             commandLine "bash", "${common.projectDir.path}/src/universal/run-tests.sh"
+        }
+
+        (1..1).each { testCase ->
+            def request = task("test_case_${testCase}_request", type:Copy) {
+                from "${common.projectDir.path}/src/universal/test_case_${testCase}.json"
+                into project.distsDir
+            }
+
+            def expected = task("test_case_${testCase}_expected", type:Copy) {
+                from "${common.projectDir.path}/src/universal/expected_results_${testCase}"
+                into project.distsDir
+            }
+
+            dockerBuildTest.dependsOn(request)
+            dockerBuildTest.dependsOn(expected)
         }
     }
 }
