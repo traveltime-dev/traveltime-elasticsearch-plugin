@@ -12,4 +12,5 @@ revisions.forEach {
 
 project.tasks.findByPath("load_script").configure {
     from "src/universal/load-data.sh"
+    duplicatesStrategy "include"
 }
