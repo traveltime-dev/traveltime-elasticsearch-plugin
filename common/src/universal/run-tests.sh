@@ -22,6 +22,9 @@ sleep 5
 docker exec $IMAGE_NAME curl -s --fail -H 'Content-Type: application/json' -d "$(cat test_case_1.json)" "localhost:9200/london/_search" \
   | jq '.hits.hits[]._source.id' > actual_results_1
 
+docker exec $IMAGE_NAME curl -s --fail -H 'Content-Type: application/json' -d "$(cat test_case_2.json)" "localhost:9200/london/_search" \
+  | jq '.hits.hits[]._source.id' > actual_results_2
+
 cmp -s actual_results_1 expected_results_1
 
 docker stop $IMAGE_NAME
