@@ -68,7 +68,7 @@ configure(subprojects - common) {
                 from configurations.runtime.allArtifacts.files
                 from configurations.runtimeClasspath
                 from "$buildDir/generated_${revision}" include '*'
-                from "src/universal/plugin-security.policy"
+                from "${common.projectDir.path}/src/universal/plugin-security.policy"
             }
 
             project.pluginZip.dependsOn("pluginZip_${revision}")
