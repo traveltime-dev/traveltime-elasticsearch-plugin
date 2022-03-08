@@ -5,7 +5,7 @@ Plugin for Elasticsearch that allows users to filter locations using the Travelt
 We maintain separate codebases for each ElasticSearch version between 7.10 and 7.16 (inclusive), and version 5.5. They reside in the appropriate branches (e.g. the plugin for version 7.16 is in the `7.16` branch).
 
 ## Installation & configuration 
-This is a standard Elasticsearch plugin. As such it can be installed by running `elasticsearch-plugin install https://github.com/traveltime-dev/traveltime-elasticsearch-plugin/releases/download/v0.2.24/traveltime-elasticsearch-plugin_v0.2-SNAPSHOT_7.16.0.zip`
+This is a standard Elasticsearch plugin. As such it can be installed by running `elasticsearch-plugin install https://github.com/traveltime-dev/traveltime-elasticsearch-plugin/releases/download/v0.2.23_7.16/traveltime-elasticsearch-plugin_7.16.0_v0.2.23.zip`
 
 To use the plugin you **must** specify the following configuration keys:
  - `traveltime.app.id`: this is you API app id.
@@ -23,7 +23,7 @@ The traveltime query may only be used with fields that are indexed as `geo_point
     - `"lat,lon"` string
     - geohash
 - `field`: **[mandatory]** the document field that will be used as the destination in the Traveltime query.
-- `traveltime`: **[mandatory]** the travel time limit in seconds. Must be non-negative.
+- `limit`: **[mandatory]** the travel time limit in seconds. Must be non-negative.
 - `mode`: Transportation mode used in the search. One of: `pt`, `walking+ferry`, `cycling+ferry`, `driving+ferry`. Must be set either in the query or in as a default in the config.
 - `country`: Country that the `origin` is in. Currently may only be one of: `uk`, `nl`, `at`, `be`, `de`, `fr`, `ie`, `lt`. Must be set either in the query or in as a default in the config.
 - `prefilter`: Arbitrary Elasticsearch query that will be used to limit which points are sent to the API.
