@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "io.freefair.gradle:lombok-plugin:5.3.0"
+        classpath "io.freefair.gradle:lombok-plugin:6.4.1"
     }
 }
 
@@ -64,11 +64,12 @@ configure(subprojects - common) {
 
             project.task("pluginZip_${revision}", dependsOn: [project.jar, "makeProperties_${revision}"], type: Zip) {
                 archiveName rootProject.name + "_${project.version}_${esVersion}.${revision}.zip"
-                destinationDir rootProject.distsDir
-                from configurations.runtime.allArtifacts.files
+                setDestinationDirectory(rootProject.distsDirectory)
+                from project.jar
+
                 from configurations.runtimeClasspath
                 from "$buildDir/generated_${revision}" include '*'
-                from "src/universal/plugin-security.policy"
+                from "${common.projectDir.path}/src/universal/plugin-security.policy"
             }
 
             project.pluginZip.dependsOn("pluginZip_${revision}")
@@ -76,65 +77,65 @@ configure(subprojects - common) {
 
         task("Dockerfile", type: Copy) {
             from "${common.projectDir.path}/src/universal/Dockerfile.template"
-            into buildDir
+            into "${buildDir}/docker"
             rename { "Dockerfile" }
             filter { line -> line.replaceAll('PLUGIN_VERSION', "${version}").replaceAll('ES_VERSION', "${esVersion}") }
         }
 
         task("dockerignore", type: Copy) {
             from "${common.projectDir.path}/src/universal/.dockerignore.template"
-            into buildDir
+            into "${buildDir}/docker"
             rename { ".dockerignore" }
             filter { line -> line.replaceAll('PLUGIN_VERSION', "${version}").replaceAll('ES_VERSION', "${esVersion}") }
         }
 
         task("testZip", type: Copy, dependsOn: "pluginZip_0") {
-            from "${rootProject.distsDir}/${rootProject.name + "_${project.version}_${esVersion}.0.zip"}"
-            into project.distsDir
+            from rootProject.distsDirectory.file("${rootProject.name + "_${project.version}_${esVersion}.0.zip"}").get()
+            into project.distsDirectory
         }
 
         task("wait_script", type: Copy) {
             from "${common.projectDir.path}/src/universal/wait-for-startup.sh"
-            into project.distsDir
+            into project.distsDirectory
         }
 
         task("test_data", type: Copy) {
             from "${common.projectDir.path}/src/universal/part0"
-            into project.distsDir
+            into project.distsDirectory
         }
 
         task("load_script", type: Copy) {
             from "${common.projectDir.path}/src/universal/load-data.sh"
-            into project.distsDir
+            into project.distsDirectory
         }
 
         task("mock_server", type: Copy) {
             from "${common.projectDir.path}/bin/mock-proto-server"
-            into project.distsDir
+            into project.distsDirectory
         }
 
         def imageName = "${project.version.toString().toLowerCase()}_${esVersion}-test"
 
         def dockerBuildTest = task("dockerBuildTest", type: Exec, dependsOn: ["Dockerfile", "dockerignore", "testZip", "wait_script", "test_data", "load_script", "mock_server"]) {
             environment "DOCKER_BUILDKIT", "1"
-            commandLine "docker", "build", ".", "-f", "build/Dockerfile", "-t", imageName
+            commandLine "docker", "build", ".", "-f", "${buildDir}/docker/Dockerfile", "-t", imageName
         }
 
         task("dockerTest", type: Exec, dependsOn: ["dockerBuildTest"] ) {
             environment "IMAGE_NAME", imageName
-            workingDir project.distsDir
+            workingDir project.distsDirectory
             commandLine "bash", "${common.projectDir.path}/src/universal/run-tests.sh"
         }
 
-        (1..1).each { testCase ->
+        (1..2).each { testCase ->
             def request = task("test_case_${testCase}_request", type:Copy) {
                 from "${common.projectDir.path}/src/universal/test_case_${testCase}.json"
-                into project.distsDir
+                into project.distsDirectory
             }
 
             def expected = task("test_case_${testCase}_expected", type:Copy) {
                 from "${common.projectDir.path}/src/universal/expected_results_${testCase}"
-                into project.distsDir
+                into project.distsDirectory
             }
 
             dockerBuildTest.dependsOn(request)

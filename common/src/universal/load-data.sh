@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-curl --fail -X PUT "localhost:9200/london" -H 'Content-Type: application/json' -d'
+curl --fail -s -o /dev/null -X PUT "localhost:9200/london" -H 'Content-Type: application/json' -d'
 {
   "mappings": {
     "properties": {
@@ -10,4 +10,4 @@ curl --fail -X PUT "localhost:9200/london" -H 'Content-Type: application/json' -
   }
 }
 '
-curl --fail -X POST "localhost:9200/london/_bulk" -H 'Content-Type: application/x-ndjson' --data-binary @part0 -o /dev/null
+curl --fail -s -X POST "localhost:9200/london/_bulk" -H 'Content-Type: application/x-ndjson' --data-binary @part0 -o /dev/null
