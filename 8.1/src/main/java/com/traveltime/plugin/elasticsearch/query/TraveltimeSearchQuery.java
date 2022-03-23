@@ -25,6 +25,7 @@ public class TraveltimeSearchQuery extends Query {
       if (prefilter != null) {
          prefilter.visit(visitor);
       }
+      visitor.visitLeaf(this);
    }
 
    @Override

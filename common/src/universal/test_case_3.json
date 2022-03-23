@@ -1,0 +1,16 @@
+{
+  "query": {
+    "traveltime": {
+      "limit": 6200,
+      "field": "coords",
+      "origin": {
+        "lat": 51.509865,
+        "lon": -0.118092
+      },
+      "mode": "pt",
+      "country": "uk"
+    }
+  },
+  "_source": false,
+  "size": 1
+}
