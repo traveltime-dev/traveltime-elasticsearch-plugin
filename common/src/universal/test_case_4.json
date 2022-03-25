@@ -1,0 +1,30 @@
+{
+  "size": 0,
+  "_source": false,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "traveltime": {
+            "limit": 7200,
+            "field": "coords",
+            "origin": "gcpvj3448qb1",
+            "mode": "pt",
+            "country": "uk"
+          }
+        },
+        {
+          "bool": {
+            "must": [
+              {
+                "exists": {
+                  "field": "coords"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
