@@ -49,7 +49,8 @@ public class TraveltimeScorer extends Scorer {
       @Override
       public boolean advanceExact(int target) throws IOException {
          invalidateCurrentValue();
-         return backing.advanceExact(target) && pointToTime.containsKey(Util.decode(nextValue()));
+         return target == DocIdSetIterator.NO_MORE_DOCS ||
+                 backing.advanceExact(target) && pointToTime.containsKey(Util.decode(nextValue()));
       }
 
       @Override

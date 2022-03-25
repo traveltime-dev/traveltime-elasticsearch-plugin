@@ -44,6 +44,7 @@ public class TraveltimeScorer extends Scorer {
       @Override
       public int advance(int target) throws IOException {
          int id = backing.advance(target);
+         if(id == DocIdSetIterator.NO_MORE_DOCS) return id;
          backingCoords.setDocument(id);
          if (backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
             return id;

@@ -127,7 +127,7 @@ configure(subprojects - common) {
             commandLine "bash", "${common.projectDir.path}/src/universal/run-tests.sh"
         }
 
-        (1..3).each { testCase ->
+        (1..4).each { testCase ->
             def request = task("test_case_${testCase}_request", type:Copy) {
                 from "${common.projectDir.path}/src/universal/test_case_${testCase}.json"
                 into project.distsDirectory

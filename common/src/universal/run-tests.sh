@@ -28,10 +28,14 @@ docker exec $IMAGE_NAME curl -s --fail -H 'Content-Type: application/json' -d "$
 docker exec $IMAGE_NAME curl -s --fail -H 'Content-Type: application/json' -d "$(cat test_case_3.json)" "localhost:9200/london/_search" \
   | jq '.hits.hits[]| has("fields")' > actual_results_3
 
+docker exec $IMAGE_NAME curl -s --fail -H 'Content-Type: application/json' -d "$(cat test_case_4.json)" "localhost:9200/london/_search" \
+  | jq '.hits.hits' > actual_results_4
 
 diff actual_results_1 expected_results_1
 diff actual_results_2 expected_results_2
 diff actual_results_3 expected_results_3
+diff actual_results_4 expected_results_4
+
 
 docker stop $IMAGE_NAME
 trap EXIT
