@@ -14,3 +14,8 @@ project.tasks.findByPath("load_script").configure {
     from "src/universal/load-data.sh"
     duplicatesStrategy "include"
 }
+
+project.tasks.findByPath("test_case_3_expected").configure {
+    from "src/universal/expected_results_3"
+    duplicatesStrategy "include"
+}
