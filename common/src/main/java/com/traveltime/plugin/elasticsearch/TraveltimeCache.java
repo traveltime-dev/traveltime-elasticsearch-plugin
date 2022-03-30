@@ -4,9 +4,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.traveltime.plugin.elasticsearch.query.TraveltimeQueryParameters;
-import com.traveltime.sdk.dto.common.Coordinates;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import lombok.val;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -15,52 +14,53 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public enum TraveltimeCache {
-   INSTANCE;
+    INSTANCE;
 
-   private final LoadingCache<TraveltimeQueryParameters, ReadWriteLock> locks =
-      CacheBuilder
-         .newBuilder()
-         .maximumSize(1000)
-         .expireAfterAccess(1, TimeUnit.MINUTES)
-         .build(new CacheLoader<TraveltimeQueryParameters, ReadWriteLock>() {
-            @NotNull
-            @Override
-            public ReadWriteLock load(@NotNull TraveltimeQueryParameters key) {
-               return new ReentrantReadWriteLock();
+    private static final class LockedMap {
+        private final ReadWriteLock lock = new ReentrantReadWriteLock();
+        private final Long2IntMap map = new Long2IntOpenHashMap();
+
+        public LockedMap() {
+            map.defaultReturnValue(-1);
+        }
+
+        public int get(long key) {
+            lock.readLock().lock();
+            try {
+                return map.get(key);
+            } finally {
+                lock.readLock().unlock();
             }
-         });
+        }
 
-   private final LoadingCache<TraveltimeQueryParameters, Map<Coordinates, Integer>> cache =
-      CacheBuilder
-         .newBuilder()
-         .maximumSize(1000)
-         .expireAfterAccess(1, TimeUnit.MINUTES)
-         .build(new CacheLoader<TraveltimeQueryParameters, Map<Coordinates, Integer>>() {
-            @NotNull
-            @Override
-            public Map<Coordinates, Integer> load(@NotNull TraveltimeQueryParameters key) {
-               val res = new Object2IntOpenHashMap<Coordinates>();
-               res.defaultReturnValue(-1);
-               return res;
+        public void putAll(Map<Long, Integer> other) {
+            lock.writeLock().lock();
+            try {
+                map.putAll(other);
+            } finally {
+                lock.writeLock().unlock();
             }
-         });
+        }
+    }
 
-   public Integer get(TraveltimeQueryParameters params, Coordinates point) {
-      val results = cache.getUnchecked(params);
-      val lock = locks.getUnchecked(params);
-      lock.readLock().lock();
-      val res = results.get(point);
-      lock.readLock().unlock();
-      return res;
-   }
+    private final LoadingCache<TraveltimeQueryParameters, LockedMap> lockedMap =
+            CacheBuilder
+                    .newBuilder()
+                    .maximumSize(1000)
+                    .expireAfterAccess(1, TimeUnit.MINUTES)
+                    .build(new CacheLoader<TraveltimeQueryParameters, LockedMap>() {
+                        @NotNull
+                        @Override
+                        public LockedMap load(@NotNull TraveltimeQueryParameters key) {
+                            return new LockedMap();
+                        }
+                    });
 
-   public void add(TraveltimeQueryParameters params, Map<Coordinates, Integer> results) {
-      val map = cache.getUnchecked(params);
-      val lock = locks.getUnchecked(params);
+    public Integer get(TraveltimeQueryParameters params, long point) {
+        return lockedMap.getUnchecked(params).get(point);
+    }
 
-      lock.writeLock().lock();
-      map.putAll(results);
-      lock.writeLock().unlock();
-
-   }
+    public void add(TraveltimeQueryParameters params, Map<Long, Integer> results) {
+        lockedMap.getUnchecked(params).putAll(results);
+    }
 }

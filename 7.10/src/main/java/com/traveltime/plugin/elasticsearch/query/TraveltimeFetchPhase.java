@@ -1,7 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.TraveltimeCache;
-import com.traveltime.plugin.elasticsearch.util.Util;
 import lombok.val;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Query;
@@ -57,7 +56,7 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
          public void process(HitContext hitContext) throws IOException {
             val docValues = hitContext.reader().getSortedNumericDocValues(params.getField());
             docValues.advance(hitContext.docId());
-            val value = Util.decode(docValues.nextValue());
+            val value = docValues.nextValue();
             Integer tt = TraveltimeCache.INSTANCE.get(params, value);
 
             if (tt > 0) {

@@ -5,8 +5,9 @@ import com.traveltime.plugin.elasticsearch.ProtoFetcher;
 import com.traveltime.plugin.elasticsearch.TraveltimeCache;
 import com.traveltime.plugin.elasticsearch.util.Util;
 import com.traveltime.sdk.dto.common.Coordinates;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.val;
@@ -69,21 +70,23 @@ public class TraveltimeWeight extends Weight {
          finalIterator = backing;
       }
 
-      val valueArray = new ArrayList<Coordinates>();
+      val valueArray = new LongArrayList();
+      val decodedArray = new ArrayList<Coordinates>();
       val valueSet = new LongOpenHashSet();
 
       while (finalIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
          long encodedCoords = backing.nextValue();
          if(valueSet.add(encodedCoords)) {
-            valueArray.add(Util.decode(encodedCoords));
+            valueArray.add(encodedCoords);
+            decodedArray.add(Util.decode(encodedCoords));
          }
       }
 
-      val pointToTime = new Object2IntOpenHashMap<Coordinates>(valueArray.size());
+      val pointToTime = new Long2IntOpenHashMap(valueArray.size());
 
       val results = protoFetcher.getTimes(
           ttQuery.getParams().getOrigin(),
-          valueArray,
+          decodedArray,
           ttQuery.getParams().getLimit(),
           ttQuery.getParams().getMode(),
           ttQuery.getParams().getCountry()
@@ -91,7 +94,7 @@ public class TraveltimeWeight extends Weight {
 
       for (int index = 0; index < results.size(); index++) {
          if(results.get(index) > 0) {
-            pointToTime.put(valueArray.get(index), results.get(index).intValue());
+            pointToTime.put(valueArray.getLong(index), results.get(index).intValue());
          }
       }
 

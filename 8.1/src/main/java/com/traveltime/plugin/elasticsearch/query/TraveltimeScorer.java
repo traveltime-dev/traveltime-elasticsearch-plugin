@@ -1,7 +1,5 @@
 package com.traveltime.plugin.elasticsearch.query;
 
-import com.traveltime.plugin.elasticsearch.util.Util;
-import com.traveltime.sdk.dto.common.Coordinates;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.index.SortedNumericDocValues;
@@ -13,7 +11,7 @@ import java.util.Map;
 
 public class TraveltimeScorer extends Scorer {
    protected final TraveltimeWeight weight;
-   private final Map<Coordinates, Integer> pointToTime;
+   private final Map<Long, Integer> pointToTime;
    private final TraveltimeFilteredDocs docs;
    private final float boost;
 
@@ -49,7 +47,7 @@ public class TraveltimeScorer extends Scorer {
       public boolean advanceExact(int target) throws IOException {
          invalidateCurrentValue();
          return (target == DocIdSetIterator.NO_MORE_DOCS && backing.advanceExact(target)) ||
-                 backing.advanceExact(target) && pointToTime.containsKey(Util.decode(nextValue()));
+                 backing.advanceExact(target) && pointToTime.containsKey(nextValue());
       }
 
       @Override
@@ -61,7 +59,7 @@ public class TraveltimeScorer extends Scorer {
       public int nextDoc() throws IOException {
          int id = backing.nextDoc();
          invalidateCurrentValue();
-         while (id != DocIdSetIterator.NO_MORE_DOCS && !pointToTime.containsKey(Util.decode(nextValue()))) {
+         while (id != DocIdSetIterator.NO_MORE_DOCS && !pointToTime.containsKey(nextValue())) {
             id = backing.nextDoc();
             invalidateCurrentValue();
          }
@@ -83,7 +81,7 @@ public class TraveltimeScorer extends Scorer {
       }
    }
 
-   public TraveltimeScorer(TraveltimeWeight w, Map<Coordinates, Integer> coordToTime, SortedNumericDocValues docs, float boost) {
+   public TraveltimeScorer(TraveltimeWeight w, Map<Long, Integer> coordToTime, SortedNumericDocValues docs, float boost) {
       super(w);
       this.weight = w;
       this.pointToTime = coordToTime;
@@ -104,7 +102,7 @@ public class TraveltimeScorer extends Scorer {
    @Override
    public float score() throws IOException {
       int limit = weight.getTtQuery().getParams().getLimit();
-      int tt = pointToTime.getOrDefault(Util.decode(docs.nextValue()), limit + 1);
+      int tt = pointToTime.getOrDefault(docs.nextValue(), limit + 1);
       return (boost * (limit - tt + 1)) / (limit + 1);
 
    }
