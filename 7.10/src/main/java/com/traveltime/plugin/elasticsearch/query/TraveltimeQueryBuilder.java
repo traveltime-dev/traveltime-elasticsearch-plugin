@@ -31,6 +31,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    private Transportation mode;
    private Country country;
    private QueryBuilder prefilter;
+   @NonNull
+   private String output = "";
 
    public TraveltimeQueryBuilder() {
    }
@@ -51,6 +53,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
          country = null;
       }
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
+      output = in.readString();
    }
 
    @Override
@@ -63,6 +66,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeBoolean(country != null);
       if (country != null) out.writeEnum(country);
       out.writeOptionalNamedWriteable(prefilter);
+      out.writeString(output);
    }
 
    @Override
@@ -73,6 +77,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("mode", mode == null ? null : mode.getValue());
       builder.field("country", country == null ? null : country.getValue());
       builder.field("prefilter", prefilter);
+      builder.field("output", output);
    }
 
    @Override
@@ -135,7 +140,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Query prefilterQuery = prefilter != null ? prefilter.toQuery(context) : null;
 
-      return new TraveltimeSearchQuery(params, prefilterQuery, appUri, appId, apiKey, batchSize);
+      return new TraveltimeSearchQuery(params, prefilterQuery, output, appUri, appId, apiKey, batchSize);
    }
 
    @Override
@@ -145,6 +150,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       if (!Objects.equals(this.mode, other.mode)) return false;
       if (!Objects.equals(this.country, other.country)) return false;
       if (!Objects.equals(this.prefilter, other.prefilter)) return false;
+      if (!Objects.equals(this.output, other.output)) return false;
       return this.limit == other.limit;
    }
 
@@ -157,6 +163,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       result = result * PRIME + Objects.hashCode(this.mode);
       result = result * PRIME + Objects.hashCode(this.country);
       result = result * PRIME + Objects.hashCode(this.prefilter);
+      result = result * PRIME + Objects.hashCode(this.output);
       result = result * PRIME + this.limit;
       return result;
    }

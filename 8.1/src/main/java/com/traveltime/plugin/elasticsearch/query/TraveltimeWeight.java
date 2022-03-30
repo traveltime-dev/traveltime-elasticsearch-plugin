@@ -28,6 +28,8 @@ public class TraveltimeWeight extends Weight {
 
    private final Weight prefilter;
 
+   private final boolean hasOutput;
+
    private final float boost;
 
    private final Logger log = LogManager.getLogger();
@@ -35,10 +37,11 @@ public class TraveltimeWeight extends Weight {
    @EqualsAndHashCode.Exclude
    private final ProtoFetcher protoFetcher;
 
-   public TraveltimeWeight(TraveltimeSearchQuery q, Weight prefilter, float boost) {
+   public TraveltimeWeight(TraveltimeSearchQuery q, Weight prefilter, boolean hasOutput, float boost) {
       super(q);
       ttQuery = q;
       this.prefilter = prefilter;
+      this.hasOutput = hasOutput;
       this.boost = boost;
       protoFetcher = FetcherSingleton.INSTANCE.getFetcher(q.getAppUri(), q.getAppId(), q.getApiKey(), SpecialPermission::new);
    }
@@ -92,7 +95,9 @@ public class TraveltimeWeight extends Weight {
          }
       }
 
-      TraveltimeCache.INSTANCE.add(ttQuery.getParams(), pointToTime);
+      if(hasOutput) {
+         TraveltimeCache.INSTANCE.add(ttQuery.getParams(), pointToTime);
+      }
 
       return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().getField()), boost);
    }

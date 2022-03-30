@@ -13,4 +13,5 @@ public class TraveltimeQueryParameters {
    private final int limit;
    @With private final Transportation mode;
    @With private final Country country;
+
 }

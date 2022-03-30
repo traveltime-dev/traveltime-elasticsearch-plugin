@@ -15,6 +15,7 @@ import java.net.URI;
 public class TraveltimeSearchQuery extends Query {
    private final TraveltimeQueryParameters params;
    private final Query prefilter;
+   private final String output;
    private final URI appUri;
    private final String appId;
    private final String apiKey;
@@ -36,7 +37,7 @@ public class TraveltimeSearchQuery extends Query {
    @Override
    public Weight createWeight(IndexSearcher searcher, ScoreMode scoreMode, float boost) throws IOException {
       Weight prefilterWeight = prefilter != null ? prefilter.createWeight(searcher, scoreMode, boost) : null;
-      return new TraveltimeWeight(this, prefilterWeight, boost);
+      return new TraveltimeWeight(this, prefilterWeight, !output.isEmpty(), boost);
    }
 
    @Override
@@ -45,7 +46,7 @@ public class TraveltimeSearchQuery extends Query {
       if (newPrefilter == prefilter) {
          return super.rewrite(reader);
       } else {
-         return new TraveltimeSearchQuery(params, newPrefilter, appUri, appId, apiKey, batchSize);
+         return new TraveltimeSearchQuery(params, newPrefilter, output, appUri, appId, apiKey, batchSize);
       }
    }
 }
