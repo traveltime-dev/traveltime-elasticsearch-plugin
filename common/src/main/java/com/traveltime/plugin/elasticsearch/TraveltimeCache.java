@@ -46,7 +46,7 @@ public enum TraveltimeCache {
     private final LoadingCache<TraveltimeQueryParameters, LockedMap> lockedMap =
             CacheBuilder
                     .newBuilder()
-                    .maximumSize(1000)
+                    .maximumSize(50)
                     .expireAfterAccess(1, TimeUnit.MINUTES)
                     .build(new CacheLoader<TraveltimeQueryParameters, LockedMap>() {
                         @NotNull
