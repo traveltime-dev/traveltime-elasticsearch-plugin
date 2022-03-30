@@ -40,16 +40,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       field = in.readString();
       origin = in.readGeoPoint();
       limit = in.readInt();
-      if (in.readBoolean()) {
-         mode = in.readEnum(Transportation.class);
-      } else {
-         mode = null;
-      }
-      if (in.readBoolean()) {
-         country = in.readEnum(Country.class);
-      } else {
-         country = null;
-      }
+      mode = in.readOptionalEnum(Transportation.class);
+      country = in.readOptionalEnum(Country.class);
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
    }
 
@@ -58,10 +50,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeString(field);
       out.writeGeoPoint(origin);
       out.writeInt(limit);
-      out.writeBoolean(mode != null);
-      if (mode != null) out.writeEnum(mode);
-      out.writeBoolean(country != null);
-      if (country != null) out.writeEnum(country);
+      out.writeOptionalEnum(mode);
+      out.writeOptionalEnum(country);
       out.writeOptionalNamedWriteable(prefilter);
    }
 
