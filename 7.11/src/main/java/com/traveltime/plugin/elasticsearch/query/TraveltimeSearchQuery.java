@@ -19,7 +19,6 @@ public class TraveltimeSearchQuery extends Query {
    private final URI appUri;
    private final String appId;
    private final String apiKey;
-   private final Integer batchSize;
 
    @Override
    public void visit(QueryVisitor visitor) {
@@ -46,7 +45,7 @@ public class TraveltimeSearchQuery extends Query {
       if (newPrefilter == prefilter) {
          return super.rewrite(reader);
       } else {
-         return new TraveltimeSearchQuery(params, newPrefilter, output, appUri, appId, apiKey, batchSize);
+         return new TraveltimeSearchQuery(params, newPrefilter, output, appUri, appId, apiKey);
       }
    }
 }
