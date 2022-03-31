@@ -63,4 +63,8 @@ public enum TraveltimeCache {
     public void add(TraveltimeQueryParameters params, Map<Long, Integer> results) {
         lockedMap.getUnchecked(params).putAll(results);
     }
+
+    public void cleanUp() {
+        lockedMap.cleanUp();
+    }
 }
