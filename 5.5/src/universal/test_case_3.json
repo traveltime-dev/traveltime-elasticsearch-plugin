@@ -8,8 +8,7 @@
         "lon": -0.118092
       },
       "mode": "pt",
-      "country": "uk",
-      "output": "traveltime"
+      "country": "uk"
     }
   },
   "_source": false,

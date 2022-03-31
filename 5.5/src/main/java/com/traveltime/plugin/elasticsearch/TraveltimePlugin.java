@@ -21,7 +21,6 @@ public class TraveltimePlugin extends Plugin implements SearchPlugin {
    public static Setting<Optional<Transportation>> DEFAULT_MODE = new Setting<>("traveltime.default.mode", s -> "", Util::findModeByName, Setting.Property.NodeScope);
    public static Setting<Optional<Country>> DEFAULT_COUNTRY = new Setting<>("traveltime.default.country", s -> "", Util::findCountryByName, Setting.Property.NodeScope);
    public static Setting<URI> API_URI = new Setting<>("traveltime.api.uri", s -> "https://proto.api.traveltimeapp.com/api/v2/", URI::create, Setting.Property.NodeScope);
-   public static Setting<Integer> BATCH_SIZE = new Setting<>("traveltime.batch.size", s -> "500000", Integer::valueOf, Setting.Property.NodeScope);
 
    @Override
    public List<Setting<?>> getSettings() {

@@ -15,6 +15,11 @@ project.tasks.findByPath("load_script").configure {
     duplicatesStrategy "include"
 }
 
+project.tasks.findByPath("test_case_3_request").configure {
+    from "src/universal/test_case_3.json"
+    duplicatesStrategy "include"
+}
+
 project.tasks.findByPath("test_case_3_expected").configure {
     from "src/universal/expected_results_3"
     duplicatesStrategy "include"

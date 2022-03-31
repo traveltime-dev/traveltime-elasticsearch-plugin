@@ -31,6 +31,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    private Transportation mode;
    private Country country;
    private QueryBuilder prefilter;
+   @NonNull
+   private String output = "";
 
    public TraveltimeQueryBuilder() {
    }
@@ -51,6 +53,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
          country = null;
       }
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
+      output = in.readString();
    }
 
    @Override
@@ -63,6 +66,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeBoolean(country != null);
       if (country != null) out.writeEnum(country);
       out.writeOptionalNamedWriteable(prefilter);
+      out.writeString(output);
    }
 
    @Override
@@ -73,11 +77,12 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("mode", mode == null ? null : mode.getValue());
       builder.field("country", country == null ? null : country.getValue());
       builder.field("prefilter", prefilter);
+      builder.field("output", output);
    }
 
    @Override
    protected QueryBuilder doRewrite(QueryRewriteContext queryRewriteContext) throws IOException {
-      if(this.prefilter != null) this.prefilter = this.prefilter.rewrite(queryRewriteContext);
+      if (this.prefilter != null) this.prefilter = this.prefilter.rewrite(queryRewriteContext);
       return super.doRewrite(queryRewriteContext);
    }
 
@@ -106,11 +111,6 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
          throw new IllegalStateException("Traveltime api key must be set in the config");
       }
 
-      Integer batchSize = TraveltimePlugin.BATCH_SIZE.get(context.getIndexSettings().getSettings());
-      if(batchSize <= 0) {
-         throw new IllegalStateException("Traveltime batch size must be greater than zero");
-      }
-
       Optional<Transportation> defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
       Optional<Country> defaultCountry = TraveltimePlugin.DEFAULT_COUNTRY.get(context.getIndexSettings().getSettings());
       Coordinates originCoord = Coordinates.builder().lat(origin.lat()).lng(origin.getLon()).build();
@@ -135,7 +135,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Query prefilterQuery = prefilter != null ? prefilter.toQuery(context) : null;
 
-      return new TraveltimeSearchQuery(params, prefilterQuery, appUri, appId, apiKey, batchSize);
+      return new TraveltimeSearchQuery(params, prefilterQuery, output, appUri, appId, apiKey);
    }
 
    @Override
@@ -145,6 +145,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       if (!Objects.equals(this.mode, other.mode)) return false;
       if (!Objects.equals(this.country, other.country)) return false;
       if (!Objects.equals(this.prefilter, other.prefilter)) return false;
+      if (!Objects.equals(this.output, other.output)) return false;
       return this.limit == other.limit;
    }
 
@@ -157,6 +158,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       result = result * PRIME + Objects.hashCode(this.mode);
       result = result * PRIME + Objects.hashCode(this.country);
       result = result * PRIME + Objects.hashCode(this.prefilter);
+      result = result * PRIME + Objects.hashCode(this.output);
       result = result * PRIME + this.limit;
       return result;
    }

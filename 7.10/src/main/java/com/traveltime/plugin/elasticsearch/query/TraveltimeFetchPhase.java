@@ -1,7 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.TraveltimeCache;
-import com.traveltime.plugin.elasticsearch.util.Util;
 import lombok.val;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Query;
@@ -20,16 +19,18 @@ import java.util.List;
 public class TraveltimeFetchPhase implements FetchSubPhase {
 
    private static class ParamFinder extends QueryVisitor {
-      private final List<TraveltimeQueryParameters> paramList = new ArrayList<>();
+      private final List<TraveltimeSearchQuery> paramList = new ArrayList<>();
 
       @Override
       public void visitLeaf(Query query) {
          if (query instanceof TraveltimeSearchQuery) {
-            paramList.add(((TraveltimeSearchQuery) query).getParams());
+            if (!((TraveltimeSearchQuery) query).getOutput().isEmpty()) {
+               paramList.add(((TraveltimeSearchQuery) query));
+            }
          }
       }
 
-      public TraveltimeQueryParameters getUniqueParam() {
+      public TraveltimeSearchQuery getQuery() {
          if (paramList.size() == 1) return paramList.get(0);
          else return null;
       }
@@ -40,11 +41,12 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
       Query query = fetchContext.query();
       val finder = new ParamFinder();
       query.visit(finder);
-      TraveltimeQueryParameters params = finder.getUniqueParam();
-      if (params == null) return null;
+      TraveltimeSearchQuery traveltimeQuery = finder.getQuery();
+      if (traveltimeQuery == null) return null;
+      TraveltimeQueryParameters params = traveltimeQuery.getParams();
+      final String output = traveltimeQuery.getOutput();
 
       FieldFetcher fieldFetcher = FieldFetcher.create(fetchContext.mapperService(), fetchContext.searchLookup(), List.of(new FieldAndFormat(params.getField(), null)));
-
 
       return new FetchSubPhaseProcessor() {
 
@@ -57,11 +59,10 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
          public void process(HitContext hitContext) throws IOException {
             val docValues = hitContext.reader().getSortedNumericDocValues(params.getField());
             docValues.advance(hitContext.docId());
-            val value = Util.decode(docValues.nextValue());
-            Integer tt = TraveltimeCache.INSTANCE.get(params, value);
+            Integer tt = TraveltimeCache.INSTANCE.get(params, docValues.nextValue());
 
             if (tt > 0) {
-               hitContext.hit().setDocumentField("traveltime", new DocumentField("traveltime", List.of(tt)));
+               hitContext.hit().setDocumentField(output, new DocumentField(output, List.of(tt)));
             }
          }
       };
