@@ -24,7 +24,7 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
       @Override
       public void visitLeaf(Query query) {
          if (query instanceof TraveltimeSearchQuery) {
-            if(!((TraveltimeSearchQuery) query).getOutput().isEmpty()) {
+            if (!((TraveltimeSearchQuery) query).getOutput().isEmpty()) {
                paramList.add(((TraveltimeSearchQuery) query));
             }
          }

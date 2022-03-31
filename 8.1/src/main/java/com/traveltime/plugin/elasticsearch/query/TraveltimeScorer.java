@@ -1,5 +1,6 @@
 package com.traveltime.plugin.elasticsearch.query;
 
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.index.SortedNumericDocValues;
@@ -7,11 +8,10 @@ import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class TraveltimeScorer extends Scorer {
    protected final TraveltimeWeight weight;
-   private final Map<Long, Integer> pointToTime;
+   private final Long2IntMap pointToTime;
    private final TraveltimeFilteredDocs docs;
    private final float boost;
 
@@ -81,7 +81,7 @@ public class TraveltimeScorer extends Scorer {
       }
    }
 
-   public TraveltimeScorer(TraveltimeWeight w, Map<Long, Integer> coordToTime, SortedNumericDocValues docs, float boost) {
+   public TraveltimeScorer(TraveltimeWeight w, Long2IntMap coordToTime, SortedNumericDocValues docs, float boost) {
       super(w);
       this.weight = w;
       this.pointToTime = coordToTime;

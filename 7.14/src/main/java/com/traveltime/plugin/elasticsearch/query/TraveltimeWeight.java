@@ -89,7 +89,7 @@ public class TraveltimeWeight extends Weight {
 
       val results = protoFetcher.getTimes(
           ttQuery.getParams().getOrigin(),
-              decodedArray,
+          decodedArray,
           ttQuery.getParams().getLimit(),
           ttQuery.getParams().getMode(),
           ttQuery.getParams().getCountry()

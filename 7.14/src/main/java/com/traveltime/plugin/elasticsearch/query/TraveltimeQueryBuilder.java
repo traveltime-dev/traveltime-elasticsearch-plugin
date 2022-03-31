@@ -31,6 +31,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    private Transportation mode;
    private Country country;
    private QueryBuilder prefilter;
+   @NonNull
    private String output = "";
 
    public TraveltimeQueryBuilder() {

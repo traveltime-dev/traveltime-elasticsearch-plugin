@@ -24,7 +24,7 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
       @Override
       public void visitLeaf(Query query) {
          if (query instanceof TraveltimeSearchQuery) {
-            if(!((TraveltimeSearchQuery) query).getOutput().isEmpty()) {
+            if (!((TraveltimeSearchQuery) query).getOutput().isEmpty()) {
                paramList.add(((TraveltimeSearchQuery) query));
             }
          }
@@ -42,7 +42,7 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
       val finder = new ParamFinder();
       query.visit(finder);
       TraveltimeSearchQuery traveltimeQuery = finder.getQuery();
-      if(traveltimeQuery == null) return null;
+      if (traveltimeQuery == null) return null;
       TraveltimeQueryParameters params = traveltimeQuery.getParams();
       final String output = traveltimeQuery.getOutput();
 
