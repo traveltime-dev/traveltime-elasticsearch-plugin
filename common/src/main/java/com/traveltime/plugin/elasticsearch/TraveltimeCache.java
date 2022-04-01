@@ -8,8 +8,8 @@ import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -43,18 +43,21 @@ public enum TraveltimeCache {
         }
     }
 
-    private final LoadingCache<TraveltimeQueryParameters, LockedMap> lockedMap =
-            CacheBuilder
-                    .newBuilder()
-                    .maximumSize(50)
-                    .expireAfterAccess(1, TimeUnit.MINUTES)
-                    .build(new CacheLoader<TraveltimeQueryParameters, LockedMap>() {
-                        @NotNull
-                        @Override
-                        public LockedMap load(@NotNull TraveltimeQueryParameters key) {
-                            return new LockedMap();
-                        }
-                    });
+    private LoadingCache<TraveltimeQueryParameters, LockedMap> lockedMap;
+
+    public void setUp(Integer size, Duration expiry) {
+        lockedMap = CacheBuilder
+                .newBuilder()
+                .maximumSize(size)
+                .expireAfterAccess(expiry)
+                .build(new CacheLoader<TraveltimeQueryParameters, LockedMap>() {
+                    @NotNull
+                    @Override
+                    public LockedMap load(@NotNull TraveltimeQueryParameters key) {
+                        return new LockedMap();
+                    }
+                });
+    }
 
     public Integer get(TraveltimeQueryParameters params, long point) {
         return lockedMap.getUnchecked(params).get(point);
