@@ -35,7 +35,7 @@ configure(subprojects - common) {
         implementation(common) {
             exclude group: 'org.apache.logging.log4j'
         }
-        implementation('com.traveltime:traveltime-sdk-java:1.1.11') {
+        implementation('com.traveltime:traveltime-sdk-java:1.1.17') {
             exclude group: 'com.fasterxml.jackson.core'
             exclude group: 'org.locationtech.jts'
         }
