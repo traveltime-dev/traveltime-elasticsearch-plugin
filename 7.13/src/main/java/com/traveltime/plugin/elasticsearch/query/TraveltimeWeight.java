@@ -10,10 +10,12 @@ import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.elasticsearch.SpecialPermission;
@@ -57,8 +59,42 @@ public class TraveltimeWeight extends Weight {
       return Explanation.noMatch("Cannot provide explanation for traveltime matches");
    }
 
-   @Override
-   public Scorer scorer(LeafReaderContext context) throws IOException {
+   @RequiredArgsConstructor
+   public static class FilteredIterator extends SortedNumericDocValues {
+      private final SortedNumericDocValues values;
+      private final DocIdSetIterator filtered;
+
+      public long nextValue() throws IOException {
+         return this.values.nextValue();
+      }
+
+      public int docValueCount() {
+         return this.values.docValueCount();
+      }
+
+      public boolean advanceExact(int target) throws IOException {
+         this.filtered.advance(target);
+         return this.values.docValueCount() > 0;
+      }
+
+      public int docID() {
+         return this.filtered.docID();
+      }
+
+      public int nextDoc() throws IOException {
+         return this.filtered.nextDoc();
+      }
+
+      public int advance(int target) throws IOException {
+         return this.filtered.advance(target);
+      }
+
+      public long cost() {
+         return this.filtered.cost();
+      }
+   }
+
+   private FilteredIterator filteredValues(LeafReaderContext context) throws IOException {
       val reader = context.reader();
       val backing = reader.getSortedNumericDocValues(ttQuery.getParams().getField());
 
@@ -73,11 +109,19 @@ public class TraveltimeWeight extends Weight {
          finalIterator = backing;
       }
 
+      return new FilteredIterator(backing, finalIterator);
+   }
+
+   @Override
+   public Scorer scorer(LeafReaderContext context) throws IOException {
+      val backing = filteredValues(context);
+      if (backing == null) return null;
+
       val valueArray = new LongArrayList();
       val decodedArray = new ArrayList<Coordinates>();
       val valueSet = new LongOpenHashSet();
 
-      while (finalIterator.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+      while (backing.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
          long encodedCoords = backing.nextValue();
          if(valueSet.add(encodedCoords)) {
             valueArray.add(encodedCoords);
@@ -105,7 +149,7 @@ public class TraveltimeWeight extends Weight {
          TraveltimeCache.INSTANCE.add(ttQuery.getParams(), pointToTime);
       }
 
-      return new TraveltimeScorer(this, pointToTime, reader.getSortedNumericDocValues(ttQuery.getParams().getField()), boost);
+      return new TraveltimeScorer(this, pointToTime, filteredValues(context), boost);
    }
 
    @Override

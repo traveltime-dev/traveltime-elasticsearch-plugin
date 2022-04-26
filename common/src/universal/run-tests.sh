@@ -2,7 +2,7 @@
 
 set -ex
 
-trap "docker stop $IMAGE_NAME; exit 1" EXIT
+trap "docker logs $IMAGE_NAME; docker stop $IMAGE_NAME; exit 1" EXIT
 
 docker run -d \
   -e "discovery.type=single-node" \

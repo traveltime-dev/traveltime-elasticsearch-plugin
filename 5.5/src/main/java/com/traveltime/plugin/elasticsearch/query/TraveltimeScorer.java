@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
+import org.apache.lucene.util.Bits;
 
 import java.io.IOException;
 import java.util.Map;
@@ -15,6 +16,7 @@ public class TraveltimeScorer extends Scorer {
    protected final TraveltimeWeight weight;
    private final Map<Coordinates, Integer> pointToTime;
    private final TraveltimeFilteredDocs docs;
+   private final Bits live;
    private final float boost;
 
    @AllArgsConstructor
@@ -33,7 +35,7 @@ public class TraveltimeScorer extends Scorer {
          int id = backing.nextDoc();
          while (id != DocIdSetIterator.NO_MORE_DOCS) {
             backingCoords.setDocument(id);
-            if (backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
+            if ((live == null || live.get(id)) && backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
                return id;
             }
             id = backing.nextDoc();
@@ -46,7 +48,7 @@ public class TraveltimeScorer extends Scorer {
          int id = backing.advance(target);
          if(id == DocIdSetIterator.NO_MORE_DOCS) return id;
          backingCoords.setDocument(id);
-         if (backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
+         if ((live == null || live.get(id)) && backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
             return id;
          } else {
             return nextDoc();
@@ -59,11 +61,12 @@ public class TraveltimeScorer extends Scorer {
       }
    }
 
-   public TraveltimeScorer(TraveltimeWeight w, Map<Coordinates, Integer> coordToTime, DocIdSetIterator docs, SortedNumericDocValues coords, float boost) {
+   public TraveltimeScorer(TraveltimeWeight w, Map<Coordinates, Integer> coordToTime, DocIdSetIterator docs, SortedNumericDocValues coords, Bits live, float boost) {
       super(w);
       this.weight = w;
       this.pointToTime = coordToTime;
       this.docs = new TraveltimeFilteredDocs(docs, coords);
+      this.live = live;
       this.boost = boost;
    }
 

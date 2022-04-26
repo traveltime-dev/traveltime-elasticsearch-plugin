@@ -71,12 +71,9 @@ public class TraveltimeWeight extends Weight {
       this.boost = boost;
    }
 
-   @Override
-   public Scorer scorer(LeafReaderContext context) throws IOException {
+   private DocIdSetIterator filteredDocs(LeafReaderContext context) throws IOException {
       val reader = context.reader();
       DocIdSetIterator docs;
-      val coords = reader.getSortedNumericDocValues(ttQuery.getParams().getField());
-
       if (prefilter != null) {
          val preScorer = prefilter.scorer(context);
          if (preScorer == null) return null;
@@ -84,6 +81,17 @@ public class TraveltimeWeight extends Weight {
       } else {
          docs = DocIdSetIterator.all(reader.maxDoc());
       }
+
+      return docs;
+   }
+
+   @Override
+   public Scorer scorer(LeafReaderContext context) throws IOException {
+      val reader = context.reader();
+      DocIdSetIterator docs = filteredDocs(context);
+      if(docs == null) return null;
+      val coords = reader.getSortedNumericDocValues(ttQuery.getParams().getField());
+
       Bits live = reader.getLiveDocs();
 
       val valueArray = new ArrayList<Coordinates>();
@@ -113,6 +121,6 @@ public class TraveltimeWeight extends Weight {
          }
       }
 
-      return new TraveltimeScorer(this, pointToTime, DocIdSetIterator.all(reader.maxDoc()), reader.getSortedNumericDocValues(ttQuery.getParams().getField()), boost);
+      return new TraveltimeScorer(this, pointToTime, filteredDocs(context), reader.getSortedNumericDocValues(ttQuery.getParams().getField()), live, boost);
    }
 }
