@@ -35,7 +35,7 @@ public class TraveltimeScorer extends Scorer {
          int id = backing.nextDoc();
          while (id != DocIdSetIterator.NO_MORE_DOCS) {
             backingCoords.setDocument(id);
-            if (live.get(id) && backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
+            if ((live == null || live.get(id)) && backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
                return id;
             }
             id = backing.nextDoc();
@@ -48,7 +48,7 @@ public class TraveltimeScorer extends Scorer {
          int id = backing.advance(target);
          if(id == DocIdSetIterator.NO_MORE_DOCS) return id;
          backingCoords.setDocument(id);
-         if (live.get(id) && backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
+         if ((live == null || live.get(id)) && backingCoords.count() > 0 && pointToTime.containsKey(Util.decode(backingCoords.valueAt(0)))) {
             return id;
          } else {
             return nextDoc();
