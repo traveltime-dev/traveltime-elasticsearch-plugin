@@ -67,7 +67,8 @@ public class TraveltimeWeight extends Weight {
       }
 
       public boolean advanceExact(int target) throws IOException {
-         return this.filtered.advance(target) != NO_MORE_DOCS && this.values.docValueCount() > 0;
+         this.filtered.advance(target);
+         return this.values.docValueCount() > 0;
       }
 
       public int docID() {
