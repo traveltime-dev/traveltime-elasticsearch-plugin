@@ -12,6 +12,25 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        esVersion:
+          - "5.5"
+          - "7.10"
+          - "7.11"
+          - "7.12"
+          - "7.13"
+          - "7.14"
+          - "7.15"
+          - "7.16"
+          - "7.17"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4"
+          - "8.5"
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 17
@@ -25,4 +44,4 @@ jobs:
       - name: Run integration test with gradle
         uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
         with:
-          arguments: dockerTest
+          arguments: ${{ matrix.esVersion }}:dockerTest
