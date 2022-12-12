@@ -7,6 +7,7 @@ import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.NonNull;
 import lombok.Setter;
 import org.apache.lucene.search.Query;
+import org.elasticsearch.Version;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.geo.GeoUtils;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -156,5 +157,10 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    @Override
    public String getWriteableName() {
       return TraveltimeQueryParser.NAME;
+   }
+
+   @Override
+   public Version getMinimalSupportedVersion() {
+      return Version.V_8_2_0;
    }
 }
