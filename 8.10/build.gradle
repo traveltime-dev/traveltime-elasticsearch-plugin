@@ -1,0 +1,6 @@
+buildPlugin(this, '8.10', ['0', '1', '2', '3-SNAPSHOT'])
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
