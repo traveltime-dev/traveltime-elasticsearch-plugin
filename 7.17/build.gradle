@@ -1,1 +1,1 @@
-buildPlugin(this, '7.17', (0..17).collect {it.toString()} + '18-SNAPSHOT')
+buildPlugin(this, '7.17', revisions(17))
