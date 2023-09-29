@@ -44,6 +44,14 @@ configure(subprojects - common) {
         implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.6'
     }
 
+    ext.revisions = { version, snapshot = true ->
+        def base = (0..version).collect { it.toString() }
+        if (snapshot)
+            base + "${version + 1}-SNAPSHOT".toString()
+        else
+            base
+    }
+
     ext.buildPlugin = { project, esVersion, esRevisions ->
         project.version = project.findProperty('tag') ?: "v0.2-SNAPSHOT"
 
