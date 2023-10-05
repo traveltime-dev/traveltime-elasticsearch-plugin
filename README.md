@@ -29,8 +29,11 @@ The traveltime query may only be used with fields that are indexed as `geo_point
     - geohash
 - `field`: **[mandatory]** the document field that will be used as the destination in the Traveltime query.
 - `limit`: **[mandatory]** the travel time limit in seconds. Must be non-negative.
-- `mode`: Transportation mode used in the search. One of: `pt`, `walking+ferry`, `cycling+ferry`, `driving+ferry`. Must be set either in the query or in as a default in the config.
-- `country`: Country that the `origin` is in. Currently may only be one of: `uk`, `nl`, `at`, `be`, `de`, `fr`, `ie`, `lt`. Must be set either in the query or in as a default in the config.
+- `mode`: Transportation mode used in the search. One of: `pt`, `walking+ferry`, `cycling+ferry`, `driving+ferry`.
+Must be set either in the query or in as a default in the config.
+- `country`: Country code (e.g. `fr`, `uk`) of the country that the `origin` is in.
+May only be set to a country that is listed in the table for "Protocol Buffers API" at https://docs.traveltime.com/api/overview/supported-countries.
+Must be set either in the query or in as a default in the config.
 - `prefilter`: Arbitrary Elasticsearch query that will be used to limit which points are sent to the API.
 - `output`: **[since 7.10]** name of the field that will hold the travel times in the response
 
