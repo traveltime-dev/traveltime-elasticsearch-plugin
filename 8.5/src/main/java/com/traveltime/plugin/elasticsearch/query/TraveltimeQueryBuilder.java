@@ -1,6 +1,7 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
+import com.traveltime.plugin.elasticsearch.util.Util;
 import com.traveltime.sdk.dto.common.Coordinates;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
@@ -29,7 +30,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    @NonNull
    private GeoPoint origin;
    private int limit;
-   private Transportation mode;
+   private Transportation.Modes mode;
    private Country country;
    private QueryBuilder prefilter;
    @NonNull
@@ -43,8 +44,9 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       field = in.readString();
       origin = in.readGeoPoint();
       limit = in.readInt();
-      mode = in.readOptionalEnum(Transportation.class);
-      country = in.readOptionalEnum(Country.class);
+      mode = in.readOptionalEnum(Transportation.Modes.class);
+      String c = in.readOptionalString();
+      if(c != null) country = Util.findCountryByName(c).orElseGet(() -> new Country.Custom(c));
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
       output = in.readString();
    }
@@ -55,7 +57,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeGeoPoint(origin);
       out.writeInt(limit);
       out.writeOptionalEnum(mode);
-      out.writeOptionalEnum(country);
+      out.writeOptionalString(country == null ? null : country.getValue());
       out.writeOptionalNamedWriteable(prefilter);
       out.writeString(output);
    }
@@ -102,7 +104,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
          throw new IllegalStateException("Traveltime api key must be set in the config");
       }
 
-      Optional<Transportation> defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
+      Optional<Transportation.Modes> defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
       Optional<Country> defaultCountry = TraveltimePlugin.DEFAULT_COUNTRY.get(context.getIndexSettings().getSettings());
       Coordinates originCoord = Coordinates.builder().lat(origin.lat()).lng(origin.getLon()).build();
       TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country);

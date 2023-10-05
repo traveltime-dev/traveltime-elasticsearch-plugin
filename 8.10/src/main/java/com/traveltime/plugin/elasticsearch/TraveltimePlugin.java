@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 public class TraveltimePlugin extends Plugin implements SearchPlugin {
     public static final Setting<String> APP_ID = Setting.simpleString("traveltime.app.id", Setting.Property.NodeScope);
     public static final Setting<String> API_KEY = Setting.simpleString("traveltime.api.key", Setting.Property.NodeScope, Setting.Property.Filtered);
-    public static final Setting<Optional<Transportation>> DEFAULT_MODE = new Setting<>("traveltime.default.mode", s -> "", Util::findModeByName, Setting.Property.NodeScope);
+    public static final Setting<Optional<Transportation.Modes>> DEFAULT_MODE = new Setting<>("traveltime.default.mode", s -> "", Util::findModeByName, Setting.Property.NodeScope);
     public static final Setting<Optional<Country>> DEFAULT_COUNTRY = new Setting<>("traveltime.default.country", s -> "", Util::findCountryByName, Setting.Property.NodeScope);
     public static final Setting<URI> API_URI = new Setting<>("traveltime.api.uri", s -> "https://proto.api.traveltimeapp.com/api/v2/", URI::create, Setting.Property.NodeScope);
 
