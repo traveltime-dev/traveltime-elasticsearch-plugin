@@ -32,7 +32,7 @@ The traveltime query may only be used with fields that are indexed as `geo_point
 - `mode`: Transportation mode used in the search. One of: `pt`, `walking+ferry`, `cycling+ferry`, `driving+ferry`.
 Must be set either in the query or in as a default in the config.
 - `country`: Country code (e.g. `fr`, `uk`) of the country that the `origin` is in.
-May only be set to a country that is supported for `proto` requests, check https://docs.traveltime.com/api/overview/supported-countries for details.
+May only be set to a country that is listed in the table for "Protocol Buffers API" at https://docs.traveltime.com/api/overview/supported-countries.
 Must be set either in the query or in as a default in the config.
 - `prefilter`: Arbitrary Elasticsearch query that will be used to limit which points are sent to the API.
 - `output`: **[since 7.10]** name of the field that will hold the travel times in the response
