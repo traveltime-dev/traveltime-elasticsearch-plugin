@@ -6,6 +6,7 @@ import com.traveltime.sdk.auth.TravelTimeCredentials;
 import com.traveltime.sdk.dto.common.Coordinates;
 import com.traveltime.sdk.dto.requests.TimeFilterFastProtoRequest;
 import com.traveltime.sdk.dto.requests.proto.Country;
+import com.traveltime.sdk.dto.requests.proto.RequestType;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import com.traveltime.sdk.dto.responses.TimeFilterFastProtoResponse;
 import com.traveltime.sdk.dto.responses.errors.IOError;
@@ -58,6 +59,7 @@ public class ProtoFetcher {
             .originCoordinate(origin)
             .destinationCoordinates(destinations)
             .travelTime(limit)
+            .requestType(RequestType.ONE_TO_MANY)
             .build();
 
 
