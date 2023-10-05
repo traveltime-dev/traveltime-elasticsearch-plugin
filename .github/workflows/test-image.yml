@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         esVersion:
-          - "5.5"
           - "7.10"
           - "7.11"
           - "7.12"
@@ -30,6 +29,11 @@ jobs:
           - "8.3"
           - "8.4"
           - "8.5"
+          - "8.6"
+          - "8.7"
+          - "8.8"
+          - "8.9"
+          - "8.10"
 
     steps:
       - uses: actions/checkout@v2
