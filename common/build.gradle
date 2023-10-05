@@ -17,7 +17,7 @@ compileJava {
 }
 
 dependencies {
-    implementation('com.traveltime:traveltime-sdk-java:1.1.11') {
+    implementation('com.traveltime:traveltime-sdk-java:1.7.0') {
         exclude group: 'com.fasterxml.jackson.core'
         exclude group: 'org.locationtech.jts'
     }

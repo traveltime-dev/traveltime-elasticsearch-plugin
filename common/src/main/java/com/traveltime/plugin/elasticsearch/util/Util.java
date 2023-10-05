@@ -18,8 +18,8 @@ public final class Util {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
    }
 
-   public static Optional<Transportation> findModeByName(String name) {
-      return Arrays.stream(Transportation.values()).filter(it -> it.getValue().equals(name)).findFirst();
+   public static Optional<Transportation.Modes> findModeByName(String name) {
+      return Arrays.stream(Transportation.Modes.values()).filter(it -> it.getValue().equals(name)).findFirst();
    }
 
    public static Optional<Country> findCountryByName(String name) {
