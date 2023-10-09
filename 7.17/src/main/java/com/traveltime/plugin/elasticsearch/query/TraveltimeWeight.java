@@ -140,7 +140,7 @@ public class TraveltimeWeight extends Weight {
       );
 
       for (int index = 0; index < results.size(); index++) {
-         if(results.get(index) > 0) {
+         if(results.get(index) >= 0) {
             pointToTime.put(valueArray.getLong(index), results.get(index).intValue());
          }
       }
