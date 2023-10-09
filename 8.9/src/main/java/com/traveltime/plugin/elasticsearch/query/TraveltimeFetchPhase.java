@@ -63,7 +63,7 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
             docValues.advance(hitContext.docId());
             Integer tt = TraveltimeCache.INSTANCE.get(params, docValues.nextValue());
 
-            if (tt > 0) {
+            if (tt >= 0) {
                hitContext.hit().setDocumentField(output, new DocumentField(output, List.of(tt)));
             }
          }
