@@ -2,6 +2,7 @@ package com.traveltime.plugin.elasticsearch.query;
 
 import com.traveltime.sdk.dto.common.Coordinates;
 import com.traveltime.sdk.dto.requests.proto.Country;
+import com.traveltime.sdk.dto.requests.proto.RequestType;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.Data;
 import lombok.With;
@@ -13,5 +14,5 @@ public class TraveltimeQueryParameters {
    private final int limit;
    @With private final Transportation mode;
    @With private final Country country;
-
+   @With private final RequestType requestType;
 }

@@ -22,6 +22,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
    private final ParseField limit = new ParseField("limit");
    private final ParseField mode = new ParseField("mode");
    private final ParseField country = new ParseField("country");
+   private final ParseField requestType = new ParseField("requestType");
    private final ParseField prefilter = new ParseField("prefilter");
    private final ParseField output = new ParseField("output");
 
@@ -35,6 +36,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
       queryParser.declareInt(TraveltimeQueryBuilder::setLimit, limit);
       queryParser.declareString((qb, s) -> qb.setMode(findByNameOrError("transportation mode", s, Util::findModeByName)), mode);
       queryParser.declareString((qb, s) -> qb.setCountry(findByNameOrError("country", s, Util::findCountryByName)), country);
+      queryParser.declareString((qb, s) -> qb.setRequestType(findByNameOrError("country", s, Util::findRequestTypeByName)), requestType);
       queryParser.declareObject(TraveltimeQueryBuilder::setPrefilter, prefilterParser, prefilter);
       queryParser.declareString(TraveltimeQueryBuilder::setOutput, output);
 

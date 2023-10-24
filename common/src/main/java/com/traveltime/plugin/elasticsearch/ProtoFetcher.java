@@ -50,7 +50,7 @@ public class ProtoFetcher {
       api = Util.elevate(builder::build, permissionSupplier);
    }
 
-   public List<Integer> getTimes(Coordinates origin, List<Coordinates> destinations, int limit, Transportation mode, Country country) {
+   public List<Integer> getTimes(Coordinates origin, List<Coordinates> destinations, int limit, Transportation mode, Country country, RequestType requestType) {
       val fastProto =
          TimeFilterFastProtoRequest
             .builder()
@@ -59,7 +59,7 @@ public class ProtoFetcher {
             .originCoordinate(origin)
             .destinationCoordinates(destinations)
             .travelTime(limit)
-            .requestType(RequestType.ONE_TO_MANY)
+            .requestType(requestType)
             .build();
 
 

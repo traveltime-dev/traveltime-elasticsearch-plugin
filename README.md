@@ -14,6 +14,7 @@ To use the plugin you **must** specify the following configuration keys:
 You may additionally specify the following configuration options:
  - `traveltime.default.mode`: the default transportation mode that will be used if none is specified in the query.
  - `traveltime.default.country`: the default country that  will be used if none is specified in the query.
+ - `trabeltime.default.request_type`: the default request type that will be used if none is specified in the query. Defaults to `ONE_TO_MANY`.
  
 The following options are available since ES version 7.10 and control the cache that enables returning travel times in the response:
  - `traveltime.cache.size`: how many requests to cache (default: 50)
@@ -33,7 +34,11 @@ The traveltime query may only be used with fields that are indexed as `geo_point
 Must be set either in the query or in as a default in the config.
 - `country`: Country code (e.g. `fr`, `uk`) of the country that the `origin` is in.
 May only be set to a country that is listed in the table for "Protocol Buffers API" at https://docs.traveltime.com/api/overview/supported-countries.
-Must be set either in the query or in as a default in the config.
+Must be set either in the query or as a default in the config.
+- `requestType`: type of request made to the api.
+Must be one of `ONE_TO_MANY`, `MANY_TO_ONE`
+Can be set either in the query or as a default in the config.
+Defaults to `ONE_TO_MANY`.
 - `prefilter`: Arbitrary Elasticsearch query that will be used to limit which points are sent to the API.
 - `output`: **[since 7.10]** name of the field that will hold the travel times in the response
 

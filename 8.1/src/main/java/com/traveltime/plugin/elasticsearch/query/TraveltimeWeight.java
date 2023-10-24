@@ -121,7 +121,8 @@ public class TraveltimeWeight extends Weight {
               decodedArray,
               ttQuery.getParams().getLimit(),
               ttQuery.getParams().getMode(),
-              ttQuery.getParams().getCountry()
+              ttQuery.getParams().getCountry(),
+              ttQuery.getParams().getRequestType()
       );
 
       for (int index = 0; index < results.size(); index++) {
