@@ -60,21 +60,12 @@ public class TraveltimeWeight extends Weight {
    }
 
    @RequiredArgsConstructor
-   public static class FilteredIterator extends SortedNumericDocValues {
+   public static class FilteredIterator {
       private final SortedNumericDocValues values;
       private final DocIdSetIterator filtered;
 
       public long nextValue() throws IOException {
          return this.values.nextValue();
-      }
-
-      public int docValueCount() {
-         return this.values.docValueCount();
-      }
-
-      public boolean advanceExact(int target) throws IOException {
-         this.filtered.advance(target);
-         return this.values.docValueCount() > 0;
       }
 
       public int docID() {

@@ -1,9 +1,7 @@
 package com.traveltime.plugin.elasticsearch.query;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
 
@@ -16,10 +14,9 @@ public class TraveltimeScorer extends Scorer {
    private final float boost;
 
    @RequiredArgsConstructor
-   private class TraveltimeFilteredDocs extends SortedNumericDocValues {
-      private final SortedNumericDocValues backing;
+   private class TraveltimeFilteredDocs extends DocIdSetIterator {
+      private final TraveltimeWeight.FilteredIterator backing;
 
-      @Getter
       private long currentValue = 0;
       private boolean currentValueDirty = true;
       private void invalidateCurrentValue() {
@@ -32,22 +29,9 @@ public class TraveltimeScorer extends Scorer {
          }
       }
 
-      @Override
       public long nextValue() throws IOException {
          advanceValue();
          return currentValue;
-      }
-
-      @Override
-      public int docValueCount() {
-         return 1;
-      }
-
-      @Override
-      public boolean advanceExact(int target) throws IOException {
-         invalidateCurrentValue();
-         return (target == DocIdSetIterator.NO_MORE_DOCS && backing.advanceExact(target)) ||
-                 backing.advanceExact(target) && pointToTime.containsKey(nextValue());
       }
 
       @Override
@@ -68,11 +52,12 @@ public class TraveltimeScorer extends Scorer {
 
       @Override
       public int advance(int target) throws IOException {
-         if (advanceExact(target)) {
-            return target;
-         } else {
-            return nextDoc();
+         int id = backing.advance(target);
+         invalidateCurrentValue();
+         if (id != DocIdSetIterator.NO_MORE_DOCS && !pointToTime.containsKey(nextValue())) {
+            id = nextDoc();
          }
+         return id;
       }
 
       @Override
@@ -81,7 +66,7 @@ public class TraveltimeScorer extends Scorer {
       }
    }
 
-   public TraveltimeScorer(TraveltimeWeight w, Long2IntMap coordToTime, SortedNumericDocValues docs, float boost) {
+   public TraveltimeScorer(TraveltimeWeight w, Long2IntMap coordToTime, TraveltimeWeight.FilteredIterator docs, float boost) {
       super(w);
       this.weight = w;
       this.pointToTime = coordToTime;
