@@ -2,6 +2,7 @@ package com.traveltime.plugin.elasticsearch.util;
 
 import com.traveltime.sdk.dto.common.Coordinates;
 import com.traveltime.sdk.dto.requests.proto.Country;
+import com.traveltime.sdk.dto.requests.proto.RequestType;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.val;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,10 @@ public final class Util {
 
    public static Optional<Country> findCountryByName(String name) {
       return Arrays.stream(Country.values()).filter(it -> it.getValue().equals(name)).findFirst();
+   }
+
+   public static Optional<RequestType> findRequestTypeByName(String name) {
+      return Arrays.stream(RequestType.values()).filter(it -> it.name().equals(name)).findFirst();
    }
 
    public static <A> A time(Logger logger, Supplier<A> expr) {

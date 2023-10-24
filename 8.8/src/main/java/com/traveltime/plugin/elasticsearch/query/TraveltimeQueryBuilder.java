@@ -4,6 +4,7 @@ import com.traveltime.plugin.elasticsearch.TraveltimePlugin;
 import com.traveltime.plugin.elasticsearch.util.Util;
 import com.traveltime.sdk.dto.common.Coordinates;
 import com.traveltime.sdk.dto.requests.proto.Country;
+import com.traveltime.sdk.dto.requests.proto.RequestType;
 import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.NonNull;
 import lombok.Setter;
@@ -33,6 +34,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    private int limit;
    private Transportation.Modes mode;
    private Country country;
+   private RequestType requestType;
    private QueryBuilder prefilter;
    @NonNull
    private String output = "";
@@ -48,6 +50,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       mode = in.readOptionalEnum(Transportation.Modes.class);
       String c = in.readOptionalString();
       if(c != null) country = Util.findCountryByName(c).orElseGet(() -> new Country.Custom(c));
+      requestType = in.readOptionalEnum(RequestType.class);
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
       output = in.readString();
    }
@@ -58,7 +61,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeGeoPoint(origin);
       out.writeInt(limit);
       out.writeOptionalEnum(mode);
-      out.writeOptionalString(country == null ? null : country.getValue());
+      out.writeOptionalString(country.getValue());
+      out.writeOptionalEnum(requestType);
       out.writeOptionalNamedWriteable(prefilter);
       out.writeString(output);
    }
@@ -70,6 +74,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("limit", limit);
       builder.field("mode", mode == null ? null : mode.getValue());
       builder.field("country", country == null ? null : country.getValue());
+      builder.field("requestType", requestType == null ? null : requestType.name());
       builder.field("prefilter", prefilter);
       builder.field("output", output);
    }
@@ -107,8 +112,11 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Optional<Transportation.Modes> defaultMode = TraveltimePlugin.DEFAULT_MODE.get(context.getIndexSettings().getSettings());
       Optional<Country> defaultCountry = TraveltimePlugin.DEFAULT_COUNTRY.get(context.getIndexSettings().getSettings());
+      Optional<RequestType> defaultRequestType = TraveltimePlugin.DEFAULT_REQUEST_TYPE.get(context.getIndexSettings().getSettings());
+
       Coordinates originCoord = Coordinates.builder().lat(origin.lat()).lng(origin.getLon()).build();
-      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country);
+
+      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country, requestType);
       if (params.getMode() == null) {
          if (defaultMode.isPresent()) {
             params = params.withMode(defaultMode.get());
@@ -121,6 +129,13 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
             params = params.withCountry(defaultCountry.get());
          } else {
             throw new IllegalStateException("Traveltime query requires either 'country' field to be present or a default country to be set in the config");
+         }
+      }
+      if(params.getRequestType() == null) {
+         if(defaultRequestType.isPresent()) {
+            params = params.withRequestType(defaultRequestType.get());
+         } else {
+            throw new IllegalStateException("Traveltime query requires either 'requestType' field to be present or a default request type to be set in the config");
          }
       }
       if (params.getLimit() <= 0) {
