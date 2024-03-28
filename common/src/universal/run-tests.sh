@@ -10,6 +10,7 @@ docker run -d \
   -e "traveltime.app.id=id" \
   -e "traveltime.api.key=key" \
   -e "xpack.security.enabled=false" \
+  -e "ES_JAVA_OPTS=-Xms750m -Xmx750m" \
   --rm \
   --name $IMAGE_NAME \
   $IMAGE_NAME
