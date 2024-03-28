@@ -1,4 +1,4 @@
-buildPlugin(this, '8.10', revisions(4))
+buildPlugin(this, '8.13', revisions(0))
 
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_17
