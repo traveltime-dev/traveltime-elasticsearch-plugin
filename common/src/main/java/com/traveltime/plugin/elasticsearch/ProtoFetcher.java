@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import java.net.URI;
 import java.security.Permission;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -51,6 +52,10 @@ public class ProtoFetcher {
    }
 
    public List<Integer> getTimes(Coordinates origin, List<Coordinates> destinations, int limit, Transportation mode, Country country, RequestType requestType) {
+      if(destinations.isEmpty()) {
+         return Collections.emptyList();
+      }
+
       val fastProto =
          TimeFilterFastProtoRequest
             .builder()
