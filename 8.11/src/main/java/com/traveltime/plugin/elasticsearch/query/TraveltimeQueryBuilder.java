@@ -39,6 +39,9 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    private QueryBuilder prefilter;
    @NonNull
    private String output = "";
+   @NonNull
+   private String distanceOutput = "";
+
 
    public TraveltimeQueryBuilder() {
    }
@@ -117,13 +120,17 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Coordinates originCoord = Coordinates.builder().lat(origin.lat()).lng(origin.getLon()).build();
 
-      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country, requestType);
+      boolean includeDistance = !distanceOutput.isEmpty();
+      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country, requestType, includeDistance);
       if (params.getMode() == null) {
          if (defaultMode.isPresent()) {
             params = params.withMode(defaultMode.get());
          } else {
             throw new IllegalStateException("Traveltime query requires either 'mode' field to be present or a default mode to be set in the config");
          }
+      }
+      if(params.isIncludeDistance() && !Util.canUseDistance(params.getMode())) {
+         throw new IllegalStateException("Traveltime query with distance output cannot be used with public transportation mode");
       }
       if (params.getCountry() == null) {
          if (defaultCountry.isPresent()) {

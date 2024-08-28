@@ -39,6 +39,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    private QueryBuilder prefilter;
    @NonNull
    private String output = "";
+   @NonNull
+   private String distanceOutput = "";
 
    public TraveltimeQueryBuilder() {
    }
@@ -54,6 +56,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       requestType = in.readOptionalEnum(RequestType.class);
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
       output = in.readString();
+      distanceOutput = in.readString();
    }
 
    @Override
@@ -66,6 +69,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeOptionalEnum(requestType);
       out.writeOptionalNamedWriteable(prefilter);
       out.writeString(output);
+      out.writeString(distanceOutput);
    }
 
    @Override
@@ -78,6 +82,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("requestType", requestType == null ? null : requestType.name());
       builder.field("prefilter", prefilter);
       builder.field("output", output);
+      builder.field("distance_output", distanceOutput);
    }
 
    @Override
@@ -117,7 +122,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Coordinates originCoord = Coordinates.builder().lat(origin.lat()).lng(origin.getLon()).build();
 
-      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country, requestType);
+      boolean includeDistance = !distanceOutput.isEmpty();
+      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country, requestType, includeDistance);
       if (params.getMode() == null) {
          if (defaultMode.isPresent()) {
             params = params.withMode(defaultMode.get());
