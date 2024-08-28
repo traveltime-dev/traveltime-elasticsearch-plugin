@@ -47,6 +47,7 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
       if (traveltimeQuery == null) return null;
       TraveltimeQueryParameters params = traveltimeQuery.getParams();
       final String output = traveltimeQuery.getOutput();
+      final String distanceOutput = traveltimeQuery.getDistanceOutput();
 
       FieldFetcher fieldFetcher = FieldFetcher.create(fetchContext.getSearchExecutionContext(), List.of(new FieldAndFormat(params.getField(), null)));
 
@@ -61,10 +62,18 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
          public void process(HitContext hitContext) throws IOException {
             val docValues = hitContext.reader().getSortedNumericDocValues(params.getField());
             docValues.advance(hitContext.docId());
-            Integer tt = TraveltimeCache.INSTANCE.get(params, docValues.nextValue());
+            if (!output.isEmpty()) {
+               Integer tt = TraveltimeCache.INSTANCE.get(params, docValues.nextValue());
+               if (tt >= 0) {
+                  hitContext.hit().setDocumentField(output, new DocumentField(output, List.of(tt)));
+               }
+            }
 
-            if (tt >= 0) {
-               hitContext.hit().setDocumentField(output, new DocumentField(output, List.of(tt)));
+            if (!distanceOutput.isEmpty()) {
+               Integer td = TraveltimeCache.DISTANCE.get(params, docValues.nextValue());
+               if (td >= 0) {
+                  hitContext.hit().setDocumentField(distanceOutput, new DocumentField(distanceOutput, List.of(td)));
+               }
             }
          }
 
