@@ -15,4 +15,5 @@ public class TraveltimeQueryParameters {
    @With private final Transportation mode;
    @With private final Country country;
    @With private final RequestType requestType;
+   @With private final boolean includeDistance;
 }

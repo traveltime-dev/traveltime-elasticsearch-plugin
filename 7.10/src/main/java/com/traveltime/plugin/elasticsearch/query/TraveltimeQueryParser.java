@@ -25,6 +25,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
    private final ParseField requestType = new ParseField("requestType");
    private final ParseField prefilter = new ParseField("prefilter");
    private final ParseField output = new ParseField("output");
+   private final ParseField distanceOutput = new ParseField("distance_output");
 
    private final ContextParser<Void, QueryBuilder> prefilterParser = (p, c) -> AbstractQueryBuilder.parseInnerQueryBuilder(p);
 
@@ -36,9 +37,10 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
       queryParser.declareInt(TraveltimeQueryBuilder::setLimit, limit);
       queryParser.declareString((qb, s) -> qb.setMode(findByNameOrError("transportation mode", s, Util::findModeByName)), mode);
       queryParser.declareString((qb, s) -> qb.setCountry(findByNameOrError("country", s, Util::findCountryByName)), country);
-      queryParser.declareString((qb, s) -> qb.setRequestType(findByNameOrError("country", s, Util::findRequestTypeByName)), requestType);
+      queryParser.declareString((qb, s) -> qb.setRequestType(findByNameOrError("request mode", s, Util::findRequestTypeByName)), requestType);
       queryParser.declareObject(TraveltimeQueryBuilder::setPrefilter, prefilterParser, prefilter);
       queryParser.declareString(TraveltimeQueryBuilder::setOutput, output);
+      queryParser.declareString(TraveltimeQueryBuilder::setDistanceOutput, distanceOutput);
 
       queryParser.declareRequiredFieldSet(field.toString());
       queryParser.declareRequiredFieldSet(origin.toString());

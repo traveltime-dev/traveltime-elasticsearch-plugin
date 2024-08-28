@@ -19,8 +19,8 @@ public final class Util {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
    }
 
-   public static Optional<Transportation.Modes> findModeByName(String name) {
-      return Arrays.stream(Transportation.Modes.values()).filter(it -> it.getValue().equals(name)).findFirst();
+   public static Optional<com.traveltime.sdk.dto.requests.proto.Transportation.Modes> findModeByName(String name) {
+      return Arrays.stream(com.traveltime.sdk.dto.requests.proto.Transportation.Modes.values()).filter(it -> it.getValue().equals(name)).findFirst();
    }
 
    public static Optional<Country> findCountryByName(String name) {
@@ -29,6 +29,14 @@ public final class Util {
 
    public static Optional<RequestType> findRequestTypeByName(String name) {
       return Arrays.stream(RequestType.values()).filter(it -> it.name().equals(name)).findFirst();
+   }
+
+   public static boolean canUseDistance(com.traveltime.sdk.dto.requests.proto.Transportation transportation) {
+      return transportation != com.traveltime.sdk.dto.requests.proto.Transportation.Modes.PUBLIC_TRANSPORT;
+   }
+
+   public static com.traveltime.sdk.dto.requests.protodistance.Transportation unsafeCastToDistanceTransportation(com.traveltime.sdk.dto.requests.proto.Transportation transportation) {
+      return new com.traveltime.sdk.dto.requests.protodistance.Transportation.Custom(transportation.getValue(), transportation.getCode());
    }
 
    public static <A> A time(Logger logger, Supplier<A> expr) {
