@@ -116,23 +116,46 @@ public class TraveltimeWeight extends Weight {
 
       val pointToTime = new Long2IntOpenHashMap(valueArray.size());
 
-      val results = protoFetcher.getTimes(
-          ttQuery.getParams().getOrigin(),
-          decodedArray,
-          ttQuery.getParams().getLimit(),
-          ttQuery.getParams().getMode(),
-          ttQuery.getParams().getCountry(),
-          ttQuery.getParams().getRequestType()
-      );
+      if (ttQuery.getParams().isIncludeDistance()) {
+         val pointToDistance = new Long2IntOpenHashMap(valueArray.size());
 
-      for (int index = 0; index < results.size(); index++) {
-         if(results.get(index) >= 0) {
-            pointToTime.put(valueArray.getLong(index), results.get(index).intValue());
+         val mode = Util.unsafeCastToDistanceTransportation(ttQuery.getParams().getMode());
+
+         val timeDistance = protoFetcher.getTimesAndDistances(
+            ttQuery.getParams().getOrigin(),
+            decodedArray,
+            ttQuery.getParams().getLimit(),
+            mode,
+            ttQuery.getParams().getCountry(),
+            ttQuery.getParams().getRequestType()
+         );
+
+         val times = timeDistance.getLeft();
+         val distances = timeDistance.getRight();
+
+         for (int index = 0; index < times.size(); index++) {
+            if (times.get(index) >= 0) {
+               pointToTime.put(valueArray.getLong(index), times.get(index).intValue());
+               pointToDistance.put(valueArray.getLong(index), distances.get(index).intValue());
+            }
          }
-      }
 
-      if(hasOutput) {
-         TraveltimeCache.INSTANCE.add(ttQuery.getParams(), pointToTime);
+         TraveltimeCache.DISTANCE.add(ttQuery.getParams(), pointToDistance);
+      } else {
+         val results = protoFetcher.getTimes(
+            ttQuery.getParams().getOrigin(),
+            decodedArray,
+            ttQuery.getParams().getLimit(),
+            ttQuery.getParams().getMode(),
+            ttQuery.getParams().getCountry(),
+            ttQuery.getParams().getRequestType()
+         );
+
+         for (int index = 0; index < results.size(); index++) {
+            if (results.get(index) >= 0) {
+               pointToTime.put(valueArray.getLong(index), results.get(index).intValue());
+            }
+         }
       }
 
       return new TraveltimeScorer(this, pointToTime, filteredValues(context), boost);
