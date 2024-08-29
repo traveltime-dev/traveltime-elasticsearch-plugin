@@ -158,6 +158,10 @@ public class TraveltimeWeight extends Weight {
          }
       }
 
+      if(hasOutput) {
+         TraveltimeCache.INSTANCE.add(ttQuery.getParams(), pointToTime);
+      }
+
       return new TraveltimeScorer(this, pointToTime, filteredValues(context), boost);
    }
 
