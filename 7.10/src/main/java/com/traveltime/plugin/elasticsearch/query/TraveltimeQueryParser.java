@@ -25,7 +25,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
    private final ParseField requestType = new ParseField("requestType");
    private final ParseField prefilter = new ParseField("prefilter");
    private final ParseField output = new ParseField("output");
-   private final ParseField distanceOutput = new ParseField("distance_output");
+   private final ParseField distanceOutput = new ParseField("distanceOutput");
 
    private final ContextParser<Void, QueryBuilder> prefilterParser = (p, c) -> AbstractQueryBuilder.parseInnerQueryBuilder(p);
 
