@@ -2,7 +2,6 @@ package com.traveltime.plugin.elasticsearch.query;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import java.io.IOException;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
@@ -17,7 +16,7 @@ public class TraveltimeScorer extends Scorer {
   private class TraveltimeFilteredDocs extends DocIdSetIterator {
     private final TraveltimeWeight.FilteredIterator backing;
 
-    @Getter private long currentValue = 0;
+    private long currentValue = 0;
     private boolean currentValueDirty = true;
 
     private void invalidateCurrentValue() {
