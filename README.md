@@ -41,6 +41,7 @@ Can be set either in the query or as a default in the config.
 Defaults to `ONE_TO_MANY`.
 - `prefilter`: Arbitrary Elasticsearch query that will be used to limit which points are sent to the API.
 - `output`: **[since 7.10]** name of the field that will hold the travel times in the response
+- `distanceOutput` **[since 7.10]**: name of the field that will hold the travel distances in the response. Cannot be used with `mode` set to `pt`.
 
 ###Examples
 
