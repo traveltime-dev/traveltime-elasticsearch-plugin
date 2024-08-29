@@ -14,7 +14,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public enum TraveltimeCache {
-    INSTANCE;
+    INSTANCE,
+    DISTANCE;
 
     private static final class LockedMap {
         private final ReadWriteLock lock = new ReentrantReadWriteLock();

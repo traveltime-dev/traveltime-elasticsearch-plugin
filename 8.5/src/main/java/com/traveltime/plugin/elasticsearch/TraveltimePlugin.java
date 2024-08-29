@@ -49,6 +49,7 @@ public class TraveltimePlugin extends Plugin implements SearchPlugin {
 
     private void cleanUpAndReschedule(ThreadPool threadPool, TimeValue cleanupSeconds) {
         TraveltimeCache.INSTANCE.cleanUp();
+        TraveltimeCache.DISTANCE.cleanUp();
         threadPool.scheduleUnlessShuttingDown(cleanupSeconds, "generic", () -> cleanUpAndReschedule(threadPool, cleanupSeconds));
     }
 
@@ -59,6 +60,7 @@ public class TraveltimePlugin extends Plugin implements SearchPlugin {
         Integer cacheSize = CACHE_SIZE.get(environment.settings());
 
         TraveltimeCache.INSTANCE.setUp(cacheSize, cacheExpiry);
+        TraveltimeCache.DISTANCE.setUp(cacheSize, cacheExpiry);
         cleanUpAndReschedule(threadPool, cleanupSeconds);
 
         return super.createComponents(client, clusterService, threadPool, resourceWatcherService, scriptService, xContentRegistry, environment, nodeEnvironment, namedWriteableRegistry, indexNameExpressionResolver, repositoriesServiceSupplier, tracer, allocationDeciders);

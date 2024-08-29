@@ -37,6 +37,8 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
    private QueryBuilder prefilter;
    @NonNull
    private String output = "";
+   @NonNull
+   private String distanceOutput = "";
 
    public TraveltimeQueryBuilder() {
    }
@@ -52,6 +54,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       requestType = in.readOptionalEnum(RequestType.class);
       prefilter = in.readOptionalNamedWriteable(QueryBuilder.class);
       output = in.readString();
+      distanceOutput = in.readString();
    }
 
    @Override
@@ -64,6 +67,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeOptionalEnum(requestType);
       out.writeOptionalNamedWriteable(prefilter);
       out.writeString(output);
+      out.writeString(distanceOutput);
    }
 
    @Override
@@ -76,6 +80,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("requestType", requestType == null ? null : requestType.name());
       builder.field("prefilter", prefilter);
       builder.field("output", output);
+      builder.field("distanceOutput", distanceOutput);
    }
 
    @Override
@@ -115,13 +120,18 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Coordinates originCoord = Coordinates.builder().lat(origin.lat()).lng(origin.getLon()).build();
 
-      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country, requestType);
+      boolean includeDistance = !distanceOutput.isEmpty();
+
+      TraveltimeQueryParameters params = new TraveltimeQueryParameters(field, originCoord, limit, mode, country, requestType, includeDistance);
       if (params.getMode() == null) {
          if (defaultMode.isPresent()) {
             params = params.withMode(defaultMode.get());
          } else {
             throw new IllegalStateException("Traveltime query requires either 'mode' field to be present or a default mode to be set in the config");
          }
+      }
+      if(params.isIncludeDistance() && !Util.canUseDistance(params.getMode())) {
+         throw new IllegalStateException("Traveltime query with distance output cannot be used with public transportation mode");
       }
       if (params.getCountry() == null) {
          if (defaultCountry.isPresent()) {
@@ -143,7 +153,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Query prefilterQuery = prefilter != null ? prefilter.toQuery(context) : null;
 
-      return new TraveltimeSearchQuery(params, prefilterQuery, output, appUri, appId, apiKey);
+      return new TraveltimeSearchQuery(params, prefilterQuery, output, distanceOutput, appUri, appId, apiKey);
    }
 
    @Override
