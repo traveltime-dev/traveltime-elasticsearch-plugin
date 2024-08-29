@@ -60,15 +60,16 @@ public class TraveltimeFetchPhase implements FetchSubPhase {
          public void process(HitContext hitContext) throws IOException {
             val docValues = hitContext.reader().getSortedNumericDocValues(params.getField());
             docValues.advance(hitContext.docId());
+            val point = docValues.nextValue();
             if(!output.isEmpty()) {
-               Integer tt = TraveltimeCache.INSTANCE.get(params, docValues.nextValue());
+               Integer tt = TraveltimeCache.INSTANCE.get(params, point);
                if (tt >= 0) {
                   hitContext.hit().setDocumentField(output, new DocumentField(output, List.of(tt)));
                }
             }
 
             if(!distanceOutput.isEmpty()) {
-               Integer td = TraveltimeCache.DISTANCE.get(params, docValues.nextValue());
+               Integer td = TraveltimeCache.DISTANCE.get(params, point);
                if (td >= 0) {
                   hitContext.hit().setDocumentField(distanceOutput, new DocumentField(distanceOutput, List.of(td)));
                }
