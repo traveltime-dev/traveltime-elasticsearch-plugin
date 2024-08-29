@@ -69,6 +69,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       out.writeOptionalEnum(requestType);
       out.writeOptionalNamedWriteable(prefilter);
       out.writeString(output);
+      out.writeString(distanceOutput);
    }
 
    @Override
@@ -81,6 +82,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("requestType", requestType == null ? null : requestType.name());
       builder.field("prefilter", prefilter);
       builder.field("output", output);
+      builder.field("distanceOutput", distanceOutput);
    }
 
    @Override
@@ -153,7 +155,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
 
       Query prefilterQuery = prefilter != null ? prefilter.toQuery(context) : null;
 
-      return new TraveltimeSearchQuery(params, prefilterQuery, output, appUri, appId, apiKey);
+      return new TraveltimeSearchQuery(params, prefilterQuery, output, distanceOutput, appUri, appId, apiKey);
    }
 
    @Override
