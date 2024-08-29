@@ -93,7 +93,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
       builder.field("country", country == null ? null : country.getValue());
       builder.field("prefilter", prefilter);
       builder.field("output", output);
-      builder.field("distance_output", distanceOutput);
+      builder.field("distanceOutput", distanceOutput);
    }
 
    @Override
