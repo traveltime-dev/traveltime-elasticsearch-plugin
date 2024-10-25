@@ -35,7 +35,7 @@ jobs:
         arguments: -Ptag=${{github.ref_name}} pluginZip
 
     - name: GH Release
-      uses: softprops/action-gh-release@v0.1.14
+      uses: softprops/action-gh-release@v2
       with:
         files: build/distributions/*.zip
 
