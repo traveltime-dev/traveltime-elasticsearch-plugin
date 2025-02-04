@@ -22,6 +22,6 @@ dependencies {
         exclude group: 'org.locationtech.jts'
     }
     implementation('org.apache.logging.log4j:log4j-api:2.17.0')
-    implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
-    implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.6'
+    implementation group: 'com.google.guava', name: 'guava', version: '33.4.0-jre'
+    implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.15'
 }
