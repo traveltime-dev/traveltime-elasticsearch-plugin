@@ -7,8 +7,8 @@ buildscript {
     }
 
     dependencies {
-        classpath "io.freefair.gradle:lombok-plugin:6.4.1"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:6.25.0"
+        classpath "io.freefair.gradle:lombok-plugin:8.12.1"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:7.0.2"
     }
 }
 
@@ -49,7 +49,7 @@ configure(subprojects - common) {
         implementation(common) {
             exclude group: 'org.apache.logging.log4j'
         }
-        implementation('com.traveltime:traveltime-sdk-java:1.7.2') {
+        implementation('com.traveltime:traveltime-sdk-java:2.0.0') {
             exclude group: 'com.fasterxml.jackson.core'
             exclude group: 'org.locationtech.jts'
         }
@@ -85,7 +85,7 @@ configure(subprojects - common) {
             }
 
             project.task("pluginZip_${revision}", dependsOn: [project.jar, "makeProperties_${revision}"], type: Zip) {
-                archiveName rootProject.name + "_${project.version}_${esVersion}.${revision}.zip"
+                archiveFileName = rootProject.name + "_${project.version}_${esVersion}.${revision}.zip"
                 setDestinationDirectory(rootProject.distsDirectory)
                 from project.jar
 
