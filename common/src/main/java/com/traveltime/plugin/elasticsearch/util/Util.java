@@ -34,10 +34,6 @@ public final class Util {
       return transportation != com.traveltime.sdk.dto.requests.proto.Transportation.Modes.PUBLIC_TRANSPORT;
    }
 
-   public static com.traveltime.sdk.dto.requests.proto.Transportation unsafeCastToDistanceTransportation(com.traveltime.sdk.dto.requests.proto.Transportation transportation) {
-      return new com.traveltime.sdk.dto.requests.proto.Transportation.Custom(transportation.getValue(), transportation.getCode());
-   }
-
    public static <A> A time(Logger logger, Supplier<A> expr) {
       val startTime = System.currentTimeMillis();
       val res = expr.get();
