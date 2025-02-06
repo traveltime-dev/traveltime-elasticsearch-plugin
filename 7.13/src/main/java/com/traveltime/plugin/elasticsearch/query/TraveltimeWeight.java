@@ -124,14 +124,12 @@ public class TraveltimeWeight extends Weight {
     if (ttQuery.getParams().isIncludeDistance()) {
       val pointToDistance = new Long2IntOpenHashMap(valueArray.size());
 
-      val mode = Util.unsafeCastToDistanceTransportation(ttQuery.getParams().getMode());
-
       val timeDistance =
           protoFetcher.getTimesAndDistances(
               ttQuery.getParams().getOrigin(),
               decodedArray,
               ttQuery.getParams().getLimit(),
-              mode,
+              ttQuery.getParams().getMode(),
               ttQuery.getParams().getCountry(),
               ttQuery.getParams().getRequestType());
 

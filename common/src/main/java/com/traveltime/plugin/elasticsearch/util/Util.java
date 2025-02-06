@@ -3,7 +3,6 @@ package com.traveltime.plugin.elasticsearch.util;
 import com.traveltime.sdk.dto.common.Coordinates;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.RequestType;
-import com.traveltime.sdk.dto.requests.proto.Transportation;
 import lombok.val;
 import org.apache.logging.log4j.Logger;
 
@@ -33,10 +32,6 @@ public final class Util {
 
    public static boolean canUseDistance(com.traveltime.sdk.dto.requests.proto.Transportation transportation) {
       return transportation != com.traveltime.sdk.dto.requests.proto.Transportation.Modes.PUBLIC_TRANSPORT;
-   }
-
-   public static com.traveltime.sdk.dto.requests.protodistance.Transportation unsafeCastToDistanceTransportation(com.traveltime.sdk.dto.requests.proto.Transportation transportation) {
-      return new com.traveltime.sdk.dto.requests.protodistance.Transportation.Custom(transportation.getValue(), transportation.getCode());
    }
 
    public static <A> A time(Logger logger, Supplier<A> expr) {

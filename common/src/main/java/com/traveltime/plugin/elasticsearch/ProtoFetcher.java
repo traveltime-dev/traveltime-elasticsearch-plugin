@@ -4,7 +4,6 @@ import com.traveltime.plugin.elasticsearch.util.Util;
 import com.traveltime.sdk.TravelTimeSDK;
 import com.traveltime.sdk.auth.TravelTimeCredentials;
 import com.traveltime.sdk.dto.common.Coordinates;
-import com.traveltime.sdk.dto.requests.TimeFilterFastProtoDistanceRequest;
 import com.traveltime.sdk.dto.requests.TimeFilterFastProtoRequest;
 import com.traveltime.sdk.dto.requests.proto.Country;
 import com.traveltime.sdk.dto.requests.proto.RequestType;
@@ -81,13 +80,13 @@ public class ProtoFetcher {
       );
    }
 
-   public Pair<List<Integer>, List<Integer>> getTimesAndDistances(Coordinates origin, List<Coordinates> destinations, int limit, com.traveltime.sdk.dto.requests.protodistance.Transportation mode, Country country, RequestType requestType) {
+   public Pair<List<Integer>, List<Integer>> getTimesAndDistances(Coordinates origin, List<Coordinates> destinations, int limit, com.traveltime.sdk.dto.requests.proto.Transportation mode, Country country, RequestType requestType) {
       if (destinations.isEmpty()) {
          return Pair.of(Collections.emptyList(), Collections.emptyList());
       }
 
       val fastProto =
-         TimeFilterFastProtoDistanceRequest
+         TimeFilterFastProtoRequest
             .builder()
             .country(country)
             .transportation(mode)
@@ -95,6 +94,7 @@ public class ProtoFetcher {
             .destinationCoordinates(destinations)
             .travelTime(limit)
             .requestType(requestType)
+            .withDistance(true)
             .build();
 
 
