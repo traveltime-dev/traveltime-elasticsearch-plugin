@@ -9,7 +9,7 @@ This is a standard Elasticsearch plugin. As such it can be installed by running 
 where `PLUGIN_VERSION` is the latest plugin version available at https://github.com/traveltime-dev/traveltime-elasticsearch-plugin/releases (e.g. `v0.2.35`),
 and `ES_VERSION` is the exact version string of the Elasticsearch instance the plugin will be installed to (e.g. `7.17.14`).
 
-For example, to install `traveltime-elasticsearch-plugin` you could run: `sudo bin/elasticsearch-plugin install https://github.com/traveltime-dev/traveltime-elasticsearch-plugin/releases/download/v0.2.37/traveltime-elasticsearch-plugin_v0.2.37_8.13.0.zip`
+For example, to install `traveltime-elasticsearch-plugin` you could run: `sudo bin/elasticsearch-plugin install https://github.com/traveltime-dev/traveltime-elasticsearch-plugin/releases/download/v0.2.37/traveltime-elasticsearch-plugin_v0.2.37_8.17.0.zip`
 
 ## Configuration
 In order for plugin to work, you will need to modify `elasticsearch.yml`, you can find more about ElasticSearch configuration here: https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html
