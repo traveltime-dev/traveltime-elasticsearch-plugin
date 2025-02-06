@@ -6,7 +6,9 @@ import com.traveltime.sdk.dto.requests.proto.RequestType;
 import lombok.val;
 import org.apache.logging.log4j.Logger;
 
+import java.security.AccessController;
 import java.security.Permission;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -42,13 +44,12 @@ public final class Util {
       return res;
    }
 
-   public static <A> A elevate(Supplier<A> expr, Supplier<Permission> permissionSupplier) {
-      Permission requiredPermission = permissionSupplier.get();
-      if (requiredPermission != null) {
-         System.out.println("Permission check: " + requiredPermission.getName());
+   public static <A> A elevate(PrivilegedAction<A> expr, Supplier<Permission> permissionSupplier) {
+      val sm = System.getSecurityManager();
+      if (sm != null) {
+         sm.checkPermission(permissionSupplier.get());
       }
-
-      return expr.get();
+      return AccessController.doPrivileged(expr);
    }
 
    public static final short BITS = 32;
