@@ -35,7 +35,7 @@ The traveltime query may only be used with fields that are indexed as `geo_point
     - `[lon, lat]` array
     - `"lat,lon"` string
     - geohash
-- `field`: **[mandatory]** the document field that will be used as the destination in the Traveltime query.
+- `field`: **[mandatory]** the document field (must be `geo_point` type) that will be used as the destination in the Traveltime query.
 - `limit`: **[mandatory]** the travel time limit in seconds. Must be non-negative.
 - `mode`: Transportation mode used in the search. One of: `pt`, `walking+ferry`, `cycling+ferry`, `driving+ferry`.
 Must be set either in the query or in as a default in the config.
