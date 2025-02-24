@@ -98,7 +98,9 @@ public class TraveltimePlugin extends Plugin implements SearchPlugin {
   public List<QuerySpec<?>> getQueries() {
     return List.of(
         new QuerySpec<>(
-            TraveltimeQueryParser.NAME, TraveltimeQueryBuilder::new, new TraveltimeQueryParser()));
+            TraveltimeQueryParser.NAME,
+            TraveltimeQueryBuilder::new,
+            TraveltimeQueryBuilder::fromXContent));
   }
 
   @Override

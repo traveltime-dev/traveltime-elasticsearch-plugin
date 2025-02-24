@@ -28,7 +28,7 @@ public class TraveltimeQueryParser implements QueryParser<TraveltimeQueryBuilder
   private final ContextParser<Void, QueryBuilder> prefilterParser =
       (p, c) -> TraveltimeQueryBuilder.parseInnerQueryBuilder(p);
 
-  private final ObjectParser<TraveltimeQueryBuilder, Void> queryParser =
+  public final ObjectParser<TraveltimeQueryBuilder, Void> queryParser =
       new ObjectParser<>(NAME, TraveltimeQueryBuilder::new);
 
   {

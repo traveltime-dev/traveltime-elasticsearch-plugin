@@ -8,7 +8,8 @@
         "lon": -0.118092
       },
       "mode": "pt",
-      "country": "uk"
+      "country": "uk",
+      "boost": 3
     }
   },
   "_source": true,
