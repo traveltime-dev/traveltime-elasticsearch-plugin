@@ -49,6 +49,7 @@ Defaults to `ONE_TO_MANY`.
 - `prefilter`: Arbitrary Elasticsearch query that will be used to limit which points are sent to the API.
 - `output`: **[since 7.10]** name of the field that will hold the travel times in the response
 - `distanceOutput` **[since 7.10]**: name of the field that will hold the travel distances in the response. Cannot be used with `mode` set to `pt`.
+- `boost` **[optional]**: Floating point number used to multiply the relevance score of matching documents. This value cannot be negative. Defaults to `1.0`.
 
 ###Examples
 
