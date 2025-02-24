@@ -29,14 +29,15 @@ The following options are available since ES version 7.10 and control the cache 
  - `traveltime.cache.cleanup.interval`: how often a background cleanup task will be run, in seconds (default: 120)
 
 ## Querying data
-The traveltime query may only be used with fields that are indexed as `geo_point`. The querry accepts the following configuration options:
+The traveltime query may only be used with fields that are indexed as `geo_point`. The query accepts the following configuration options:
 - `origin`: **[mandatory]** the point from which travel time will be measured. The accepted formats are:
     - object with `lon` and `lat` properties
     - `[lon, lat]` array
     - `"lat,lon"` string
     - geohash
-- `field`: **[mandatory]** the document field (must be `geo_point` type) that will be used as the destination in the Traveltime query.
-- `limit`: **[mandatory]** the travel time limit in seconds. Must be non-negative.
+- `field`: **[mandatory]** name of the field (must be `geo_point` type) that will be used as the destination in the TravelTime query.
+- `limit`: **[mandatory]** the travel time limit in seconds (must be non-negative). If time to travel from origin to destination would take more than limit, such result would be excluded.
+If the destination is unreachable, the result will be excluded as well.
 - `mode`: Transportation mode used in the search. One of: `pt`, `walking+ferry`, `cycling+ferry`, `driving+ferry`.
 Must be set either in the query or in as a default in the config.
 - `country`: Country code (e.g. `fr`, `uk`) of the country that the `origin` is in.
@@ -51,44 +52,134 @@ Defaults to `ONE_TO_MANY`.
 - `distanceOutput` **[since 7.10]**: name of the field that will hold the travel distances in the response. Cannot be used with `mode` set to `pt`.
 - `boost` **[optional]**: Floating point number used to multiply the relevance score of matching documents. This value cannot be negative. Defaults to `1.0`.
 
-###Examples
+### Examples
 
-```json
+TravelTime plugin could be used as an alternative to ElasticSearch geo related queries, for example,
+instead of `geo_distance` (https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-geo-distance-query.html) it is possible to filter out results not by distance, but by travel time.
+
+Let's say we want to filter out universities in the United Kingdom which can be reached by driving up to 60 minutes from Tower of London.
+
+Data:
+```
+PUT universities
 {
-  "query": {
-    "traveltime": {
-      "limit": 900,
-      "field": "coords",
-      "origin": {
-        "lat": 51.509865,
-        "lon": -0.118092
+  "mappings": {
+    "properties": {
+      "name":{
+        "type": "text"
+      },
+      "location":{
+        "type": "geo_point"
       }
     }
   }
-}    
+}
+ 
+PUT universities/_doc/1
+{
+  "name":"London School of Economics and Political Science",
+  "location":[-0.116422, 51.5145976]
+}
+ 
+PUT universities/_doc/2
+{
+  "name":"Imperial College London",
+  "location":[-0.1756407, 51.4989595]
+}
+ 
+PUT universities/_doc/3
+{
+  "name":"University of Oxford",
+  "location":[-1.2556685, 51.7587075]
+}
+ 
+PUT universities/_doc/4
+{
+  "name":"University of Cambridge",
+  "location":[0.092005, 52.2109456]
+}
 ```
 
-```json
+Query:
+```
+GET universities/_search
 {
-  "traveltime": {
-    "limit": 7200,
-    "field": "coords",
-    "origin": "gcpvj3448qb1",
-    "mode": "pt",
-    "country": "uk",
-    "prefilter": {
-      "bool": {
-        "filter": [
-          {
-            "range": {
-              "bedrooms": {
-                "gte": 3
-              }
-            }
-          }
-        ]
-      }
+  "query": {
+    "traveltime": {
+      "limit": 3600,
+      "mode": "driving+ferry",
+      "country": "uk",
+      "field": "location",
+      "origin": {
+        "lat": 51.508217,
+        "lon": -0.0761879
+      },
+      "output": "travel_time",
+      "distanceOutput": "distance"
     }
+  }
+}
+```
+
+Would result in:
+```
+{
+  "took": 293,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 2,
+      "relation": "eq"
+    },
+    "max_score": 0.6925854,
+    "hits": [
+      {
+        "_index": "universities",
+        "_id": "1",
+        "_score": 0.6925854,
+        "_source": {
+          "name": "London School of Economics and Political Science",
+          "location": [
+            -0.116422,
+            51.5145976
+          ]
+        },
+        "fields": {
+          "distance": [
+            3989
+          ],
+          "travel_time": [
+            1107
+          ]
+        }
+      },
+      {
+        "_index": "universities",
+        "_id": "2",
+        "_score": 0.32129964,
+        "_source": {
+          "name": "Imperial College London",
+          "location": [
+            -0.1756407,
+            51.4989595
+          ]
+        },
+        "fields": {
+          "distance": [
+            8957
+          ],
+          "travel_time": [
+            2444
+          ]
+        }
+      }
+    ]
   }
 }
 ```
