@@ -21,6 +21,7 @@ import org.elasticsearch.index.mapper.GeoPointFieldMapper;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.xcontent.XContentBuilder;
+import org.elasticsearch.xcontent.XContentParser;
 
 @Setter
 public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQueryBuilder> {
@@ -33,6 +34,16 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
   private QueryBuilder prefilter;
   @NonNull private String output = "";
   @NonNull private String distanceOutput = "";
+
+  private static TraveltimeQueryParser PARSER = new TraveltimeQueryParser();
+
+  static {
+    declareStandardFields(PARSER.queryParser);
+  }
+
+  public static TraveltimeQueryBuilder fromXContent(XContentParser parser) throws IOException {
+    return PARSER.fromXContent(parser);
+  }
 
   public TraveltimeQueryBuilder() {}
 
@@ -74,6 +85,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
     builder.field("prefilter", prefilter);
     builder.field("output", output);
     builder.field("distanceOutput", distanceOutput);
+    printBoostAndQueryName(builder);
   }
 
   @Override

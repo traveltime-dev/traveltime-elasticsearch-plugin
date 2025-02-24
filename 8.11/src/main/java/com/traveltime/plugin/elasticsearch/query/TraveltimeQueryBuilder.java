@@ -37,6 +37,16 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
   @NonNull private String output = "";
   @NonNull private String distanceOutput = "";
 
+  private static TraveltimeQueryParser PARSER = new TraveltimeQueryParser();
+
+  static {
+    declareStandardFields(PARSER.queryParser);
+  }
+
+  public static TraveltimeQueryBuilder fromXContent(XContentParser parser) throws IOException {
+    return PARSER.fromXContent(parser);
+  }
+
   public TraveltimeQueryBuilder() {}
 
   public TraveltimeQueryBuilder(StreamInput in) throws IOException {
@@ -76,6 +86,7 @@ public class TraveltimeQueryBuilder extends AbstractQueryBuilder<TraveltimeQuery
     builder.field("prefilter", prefilter);
     builder.field("output", output);
     builder.field("distanceOutput", distanceOutput);
+    boostAndQueryNameToXContent(builder);
   }
 
   @Override
